@@ -21,7 +21,7 @@ input_data/nimplex_GF_5_20_neighbors.npy
 input_data/kde-plots.py
 input_data/tc_df.csv
 input_data/data_management.py
-ModelsDataV3/AllModels
+ModelsDataV3/AllModels/
 VAE/
 DNNF/
 Encoder-Decoder-TabNet/
