@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-os.makedirs('results',exist_ok=True)
+os.makedirs('results_heatmap',exist_ok=True)
 
 # %%
 
@@ -60,7 +60,6 @@ def get_top_correlated_pairs(corr_matrix, method_name, top_n=40, output_dir="res
     return top_corr_df
 
 # Example usage
-# Assuming `corr` is your correlation matrix
 # top_40_df = get_top_correlated_pairs(corr, top_n=40, output_file="results/top_40_correlated_pairs.xlsx")
 
 # %%
@@ -107,7 +106,6 @@ df = pd.read_csv('data/HTMDEC_MasterTable_Interpolated_Orange_Iterations_BBC_wit
 
 # Define input and output columns
 input_columns = df.columns[3:11]
-#output_columns = df.columns[36:37] # Remaining columns
 output_columns = df.columns[ 11: ] # Remaining columns
 output_columns = output_columns.drop(['SFE_calc'])
 
@@ -132,95 +130,10 @@ df_sliced = dataset
 
 print(df_sliced)
 
-# %%
-
-# sns.set_context("talk", font_scale=0.8)  # Adjust font_scale to control overall font size
-
-# #custom_palette = sns.color_palette(['#FF6347', '#4682B4', '#FFD700'])  # Add more colors as needed
-# custom_palette = ['#0072B2', '#E69F00', '#009E73', '#F0E442', '#D55E00', 
-#                   '#56B4E9', '#CC79A7', '#999999', '#F7B267']
-
-# # Seaborn pairplot for plot matrix
-# # Create the pairplot with custom label size
-# g = sns.pairplot(df_sliced, palette=custom_palette, 
-#                  plot_kws={'s': 50},   # Control marker size in the scatter plot
-#                  diag_kws={'lw': 2})   # Control line width in the diagonal plots
-
-# sns.set_style("whitegrid", {'axes.labelsize': 12, 'xtick.labelsize': 10, 'ytick.labelsize': 10})
-# # Set the figure size
-# g.fig.set_size_inches(20, 18)  # Adjust the width and height as needed
-
-# # Set the legend location
-# g._legend.set_bbox_to_anchor((0.98, 0.12))  # Adjust the legend location; (1, 0.5) places it to the right of the plot
-# #g._legend.set_title("Iteration")        # Optionally set a title for the legend
-
-# g.fig.suptitle("Borg-HEA Data", y=1.00, fontsize=16)  # 'y' adjusts the vertical position
-# # Show the plot
-# plt.tight_layout()  # Adjust layout to make room for the rotated labels
-
-# plt.savefig('results/plotmatrix-all.jpg', dpi=300)
-# plt.show()
-
-# %%
-
-# x_col = 'Yield Strength (MPa)'  # Replace with your specific column name
-# y_col = 'Tension Elongation (%)'  # Replace with your specific column name
-
-# plt.figure(figsize=(6, 6))  # Create a new figure for the specific pair
-# sns.scatterplot(x=x_col, y=y_col, data=df_sliced, hue='Iteration', palette=custom_palette, s=100)
-
-# plt.tight_layout()
-# plt.savefig(f"results/Pair: {x_col} vs {y_col}.jpg")
-# plt.show()
-
-# # 1
-# x_col = 'Ultimate Tensile Strength (MPa)'  # Replace with your specific column name
-# y_col = 'Yield Strength (MPa)'  # Replace with your specific column name
-
-# plt.figure(figsize=(6, 6))  # Create a new figure for the specific pair
-# sns.scatterplot(x=x_col, y=y_col, data=df_sliced, hue='Iteration', palette=custom_palette, s=100)
-
-# plt.tight_layout()
-# plt.savefig(f"results/Pair: {x_col} vs {y_col}.jpg")
-# plt.show()
-
-# # 2
-# x_col = 'Tension Elongation (%)'  # Replace with your specific column name
-# y_col = 'UTS/YS'  # Replace with your specific column name
-
-# plt.figure(figsize=(6, 6))  # Create a new figure for the specific pair
-# sns.scatterplot(x=x_col, y=y_col, data=df_sliced, hue='Iteration', palette=custom_palette, s=100)
-
-# plt.tight_layout()
-# plt.savefig(f"results/Pair: {x_col} vs UTSYS ratio.jpg")
-# plt.show()
-# # 3
-# x_col = 'Tension Elongation (%)'  # Replace with your specific column name
-# y_col = 'Yield Strength (MPa)'  # Replace with your specific column name
-
-# plt.figure(figsize=(6, 6))  # Create a new figure for the specific pair
-# sns.scatterplot(x=x_col, y=y_col, data=df_sliced, hue='Iteration', palette=custom_palette, s=100)
-
-# plt.tight_layout()
-# plt.savefig(f"results/Pair: {x_col} vs {y_col}.jpg")
-# plt.show()
-# # 4
-# x_col = 'Tension Elongation (%)'  # Replace with your specific column name
-# y_col = 'Ultimate Tensile Strength (MPa)'  # Replace with your specific column name
-
-# plt.figure(figsize=(6, 6))  # Create a new figure for the specific pair
-# sns.scatterplot(x=x_col, y=y_col, data=df_sliced, hue='Iteration', palette=custom_palette, s=100)
-
-# plt.tight_layout()
-# plt.savefig(f"results/Pair {x_col} vs {y_col}.jpg")
-# plt.show()
-
-# %% Origial Data 
-
+# %% Data 
 
 # # Select only those columns from the DataFrame
 df_sliced2 = dataset
-
 print(df_sliced2.columns)
 
 # Normalize each column of df_sliced2 using Min-Max scaling
@@ -266,232 +179,14 @@ for method in correlation_methods:
     
     # Adjust layout and save the plot
     plt.tight_layout()
-    plt.savefig(f'results/{method}_correlation_heatmap.jpg', dpi=300)
+    plt.savefig(f'results_heatmap/{method}_correlation_heatmap.jpg', dpi=300)
     plt.show()
     
     # Use the updated function to save top correlated pairs
-    top_40_df = get_top_correlated_pairs(corr, method_name=method, top_n=40, output_dir="results")
-
-    print(f"{method.capitalize()} correlation heatmap saved successfully.")
-
-pause
-# %% Normalize each series (column) in the DataFrame
-
-df_normalized = df_sliced2.apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
-
-# Display the normalized DataFrame
-print(df_normalized)
-
-df_sliced2 = df_normalized 
-
-# List of correlation methods
-correlation_methods = ['pearson']
-
-# Loop through each method and calculate/save the results
-for method in correlation_methods:
-    # Calculate the correlation matrix
-    corr = df_sliced2.corr(method=method)
-    
-    # Create a mask for the upper triangle
-    mask = np.triu(np.ones_like(corr, dtype=bool))
-    
-    # Set up the matplotlib figure
-    plt.figure(figsize=(15, 13))
-    
-    # Draw the heatmap with the mask and correct aspect ratio
-    sns.heatmap(corr, 
-                mask=mask, 
-                annot=True,              # Enable annotations
-                cmap='coolwarm', 
-                square=True, 
-                linewidths=0.5, 
-                annot_kws={"size": 14},  # Set font size for annotations
-                cbar_kws={"shrink": 0.75})
-    
-    # Rotate the x and y axis labels by 45 degrees
-    plt.xticks(rotation=90, ha='right', fontsize=14)  # ha='right' aligns the labels better
-    plt.yticks(rotation=0, ha='right', fontsize=14)
-    
-    # Set a title for the heatmap
-    plt.title(f"{method.capitalize()} Correlation Heatmap", fontsize=16, pad=20)
-    
-    # Adjust layout and save the plot
-    plt.tight_layout()
-    plt.savefig(f'results/{method}_correlation_heatmap.jpg', dpi=300)
-    plt.show()
-    
-    # Use the updated function to save top correlated pairs
-    top_40_df = get_top_correlated_pairs(corr, method_name=method, top_n=40, output_dir="results")
+    top_40_df = get_top_correlated_pairs(corr, method_name=method, top_n=40, output_dir="results_heatmap")
 
     print(f"{method.capitalize()} correlation heatmap saved successfully.")
 
 
-# %% Origial Data without grain size
-
-columns_to_keep = [ 
-                   'Al', 'Co', 'Cr', 'Cu', 'Fe', 'Mn', 'Ni', 'V', 
-                   'Yield Strength(Mpa)', 'UTS_True(Mpa)', 'UTS/YS', 'Elong_T(%)',
-                   'Hardness (GPa)', 'Modulus(Gpa)']
-
-#                   'Yield Strength (MPa)', 'Ultimate Tensile Strength (MPa)', 'UTS/YS', 'Tension Elongation (%)', 
-#                   'Hardness (GPa)', 'Modulus (GPa)', 'SRS (x10-3)', 'Predicted SFE (mJ/m2)']  # Indices of columns you want to retain
-
-# # Select only those columns from the DataFrame
-df_sliced2 = dataset[columns_to_keep]
-
-print(df_sliced2.columns)
-
-# Normalize each column of df_sliced2 using Min-Max scaling
-df_normalized = df_sliced2.apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
-
-# Display the normalized DataFrame
-print(df_normalized.head())
-
-# List of correlation methods
-correlation_methods = ['pearson']#, 'kendall', 'spearman']
-
-# Loop through each method and calculate/save the results
-for method in correlation_methods:
-    # Calculate the correlation matrix
-    corr = df_normalized.corr(method=method)
-    
-    #print(df_sliced2)
-    #print(corr)
     
     
-    # Create a mask for the upper triangle
-    mask = np.triu(np.ones_like(corr, dtype=bool))
-    
-    # Set up the matplotlib figure
-    plt.figure(figsize=(15, 13))
-    
-    # Draw the heatmap with the mask and correct aspect ratio
-    sns.heatmap(corr, 
-                mask=mask, 
-                annot=True,              # Enable annotations
-                cmap='coolwarm', 
-                square=True, 
-                linewidths=0.5, 
-                annot_kws={"size": 14},  # Set font size for annotations
-                cbar_kws={"shrink": 0.75})
-    
-    # Rotate the x and y axis labels by 45 degrees
-    plt.xticks(rotation=90, ha='right', fontsize=14)  # ha='right' aligns the labels better
-    plt.yticks(rotation=0, ha='right', fontsize=14)
-    
-    # Set a title for the heatmap
-    plt.title(f"{method.capitalize()} Correlation Heatmap", fontsize=16, pad=20)
-    
-    # Adjust layout and save the plot
-    plt.tight_layout()
-    plt.savefig(f'results/{method}_correlation_heatmap.jpg', dpi=300)
-    plt.show()
-    
-    # Use the updated function to save top correlated pairs
-    top_40_df = get_top_correlated_pairs(corr, method_name=method, top_n=40, output_dir="results")
-
-    print(f"{method.capitalize()} correlation heatmap saved successfully.")
-
-# %% original data without grain size and after cleaning data
-
-columns_to_keep = [ 
-                   'Al', 'Co', 'Cr', 'Cu', 'Fe', 'Mn', 'Ni', 'V', 
-                   'Yield Strength(Mpa)', 'UTS_True(Mpa)', 'UTS/YS', 'Elong_T(%)',
-                   'Hardness (GPa)', 'Modulus(Gpa)']
-
-#                   'Yield Strength (MPa)', 'Ultimate Tensile Strength (MPa)', 'UTS/YS', 'Tension Elongation (%)', 
-#                   'Hardness (GPa)', 'Modulus (GPa)', 'SRS (x10-3)', 'Predicted SFE (mJ/m2)']  # Indices of columns you want to retain
-
-# # Select only those columns from the DataFrame
-df_sliced2 = dataset[columns_to_keep]
-
-print(df_sliced2.columns)
-
-# Normalize each column of df_sliced2 using Min-Max scaling
-df_normalized = df_sliced2.apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
-
-# Drop rows with any missing values
-df_cleaned = df_normalized.dropna()
-
-# Display the cleaned DataFrame
-print(df_cleaned.head())
-
-# Check the number of remaining rows
-print(f"Number of rows before dropping: {len(df_normalized)}")
-print(f"Number of rows after dropping: {len(df_cleaned)}")
-
-# Display the normalized DataFrame
-print(df_cleaned.head())
-
-# List of correlation methods
-correlation_methods = ['pearson']#, 'kendall', 'spearman']
-
-# Loop through each method and calculate/save the results
-for method in correlation_methods:
-    # Calculate the correlation matrix
-    corr = df_cleaned.corr(method=method)
-    
-    #print(df_sliced2)
-    #print(corr)
-    
-    
-    # Create a mask for the upper triangle
-    mask = np.triu(np.ones_like(corr, dtype=bool))
-    
-    # Set up the matplotlib figure
-    plt.figure(figsize=(15, 13))
-    
-    # Draw the heatmap with the mask and correct aspect ratio
-    sns.heatmap(corr, 
-                mask=mask, 
-                annot=True,              # Enable annotations
-                cmap='coolwarm', 
-                square=True, 
-                linewidths=0.5, 
-                annot_kws={"size": 14},  # Set font size for annotations
-                cbar_kws={"shrink": 0.75})
-    
-    # Rotate the x and y axis labels by 45 degrees
-    plt.xticks(rotation=90, ha='right', fontsize=14)  # ha='right' aligns the labels better
-    plt.yticks(rotation=0, ha='right', fontsize=14)
-    
-    # Set a title for the heatmap
-    plt.title(f"{method.capitalize()} Correlation Heatmap", fontsize=16, pad=20)
-    
-    # Adjust layout and save the plot
-    plt.tight_layout()
-    plt.savefig(f'results/{method}_correlation_heatmap.jpg', dpi=300)
-    plt.show()
-    
-    # Use the updated function to save top correlated pairs
-    top_40_df = get_top_correlated_pairs(corr, method_name=method, top_n=40, output_dir="results")
-
-    print(f"{method.capitalize()} correlation heatmap saved successfully.")
-    
-    
-pause
-# %%
-
-# Example usage
-custom_palette = ['#FF6347', '#4682B4', '#FFD700']  # Replace with your palette
-
-# Call the function for different pairs
-plot_with_sfe_markers(dataset, 'Yield Strength (MPa)', 'Tension Elongation (%)', 
-                      'Iteration', 'SFE_calc', custom_palette, 
-                      "results/Pair_Yield_Strength_vs_Tension_Elongation_SFE.jpg")
-
-plot_with_sfe_markers(dataset, 'Ultimate Tensile Strength (MPa)', 'Yield Strength (MPa)', 
-                      'Iteration', 'SFE_calc', custom_palette, 
-                      "results/Pair_Ultimate_Tensile_Strength_vs_Yield_Strength_SFE.jpg")
-
-plot_with_sfe_markers(dataset, 'Tension Elongation (%)', 'UTS/YS', 
-                      'Iteration', 'SFE_calc', custom_palette, 
-                      "results/Pair_Tension_Elongation_vs_UTS_YS_SFE.jpg")
-
-plot_with_sfe_markers(dataset, 'Tension Elongation (%)', 'Yield Strength (MPa)', 
-                      'Iteration', 'SFE_calc', custom_palette, 
-                      "results/Pair_Tension_Elongation_vs_Yield_Strength_SFE.jpg")
-
-plot_with_sfe_markers(dataset, 'Tension Elongation (%)', 'Ultimate Tensile Strength (MPa)', 
-                      'Iteration', 'SFE_calc', custom_palette, 
-                      "results/Pair_Tension_Elongation_vs_Ultimate_Tensile_Strength_SFE.jpg")
