@@ -1,0 +1,7 @@
+\begin{tabular}{l|ccccc}
+\toprule
+Model Name & PROPERTY: Calculated Density (g/cm$^3$) & PROPERTY: HV & PROPERTY: YS (MPa) & PROPERTY: UTS (MPa) \\
+\midrule
+XGBoost & MSE: 0.09606 (R$^2$: 0.9104) & MSE: 6832 (R$^2$: 0.4417) & MSE: 1.003e+05 (R$^2$: 0.622) & MSE: 1.829e+05 (R$^2$: 0.7236) \\
+\bottomrule
+\end{tabular}
