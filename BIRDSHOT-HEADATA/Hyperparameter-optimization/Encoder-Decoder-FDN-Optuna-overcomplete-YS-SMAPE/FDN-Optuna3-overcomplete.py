@@ -266,7 +266,7 @@ def load_and_split_data():
 
     # Define input and output columns
     df = pd.read_csv('../../data/HTMDEC_MasterTable_Iterations_v3_processed.csv')
-
+    
     # Define input and output columns
     input_columns = [
         'Al','Co','Cr','Cu','Fe','Mn','Ni','V',
@@ -356,7 +356,7 @@ if __name__ == "__main__":
         )
     
     # Split the number of trials across multiple processes
-    total_trials  = 5*20
+    total_trials  = 0*20
     num_processes = 5
     num_trials_per_process = total_trials // num_processes  # Adjust this based on desired total trials
 
@@ -435,14 +435,13 @@ if __name__ == "__main__":
     
     # Plot R² Score Evolution
     plt.figure(figsize=(10, 6))
-    plt.plot(r2_scores, label='R² Score', color='orange')
+    plt.plot(r2_scores, label='SMAPE Score', color='orange')
     plt.xlabel('Trial')
-    plt.ylabel('R²')
-    plt.title('R² Score Evolution')
+    plt.ylabel('SMAPE')
+    plt.title('SMAPE Score Evolution')
     plt.legend()
     plt.show()
-    
-    
+        
     # Plot contour for the first objective (e.g., Loss)
     # plt.figure(figsize=(10, 6))
     # ax = optuna.visualization.matplotlib.plot_contour(
@@ -461,10 +460,10 @@ if __name__ == "__main__":
         study,
         params=["latent_dim", "batch_size"],
         target=lambda t: t.values[0],  # Second objective (Negative R² converted to positive)
-        target_name="R² Score"
+        target_name="SMAPE Score"
     )
     plt.tight_layout()
-    plt.savefig('optimization_contour_R2.jpg')
+    plt.savefig('optimization_contour.jpg')
     plt.show()
     
      
@@ -691,14 +690,14 @@ if __name__ == "__main__":
              [min(y_train.flatten()), max(y_train.flatten())], color='blue', linestyle=':', linewidth=2, label='Train Ideal Fit')
     
 
-    plt.xlabel("Actual: YS")
-    plt.ylabel("Predicted")
+    plt.xlabel("Actual: YS", fontsize=16)
+    plt.ylabel("Predicted", fontsize=16)
     #plt.title("Parity Plot")
     #plt.grid(True)
-    plt.legend(loc='lower right')  # Place the legend in the bottom-right corner
+    plt.legend(loc='lower right', fontsize=12)  # Place the legend in the bottom-right corner
+    plt.savefig('parityplot-scaled.jpg', dpi=300, transparent=True)
     plt.show()
-        
-
+    
     # %%
     
     # End timer
