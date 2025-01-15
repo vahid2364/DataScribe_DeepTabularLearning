@@ -330,24 +330,22 @@ if __name__ == "__main__":
         list(values) + [np.nan] * (max_trials - len(values)) for values in objective_data
     ]
     
-    # Convert to a NumPy array for heatmap
-    padded_data_array = np.array(padded_data)
+    # Pad the shorter lists with NaN so that all lists have the same length
+    padded_data = []
+    for values in objective_data:
+        # Convert tuple to list and pad with NaN
+        padded_values = list(values) + [np.nan] * (max_trials - len(values))
+        padded_data.append(padded_values)
     
-    # Optional: Take the log of values to improve visualization, ensuring no negative or zero values
-    log_padded_data = np.log(np.nan_to_num(padded_data_array, nan=0.0) + 1e-9)
+    # Convert the padded data to a NumPy array
+    padded_data_array = np.array(padded_data, dtype=np.float64)  # Ensure consistent numeric type
     
     # Create the heatmap
-    plt.figure(figsize=(15, 5))
-    sns.heatmap(
-        log_padded_data,
-        cmap="YlGnBu",
-        xticklabels=True,
-        yticklabels=[study_info["name"] for study_info in study_infos],
-        cbar_kws={"label": "Log(Objective Value)"}
-    )
+    plt.figure(figsize=(15, 2))
+    sns.heatmap(padded_data_array, cmap="YlGnBu", xticklabels=True, yticklabels=[study["name"] for study in study_infos])
     plt.xlabel("Trial Number")
     plt.ylabel("Study")
-    plt.title("Heatmap of Objective Values Across Studies")
+    plt.title("Heatmap of Objective Values")
     plt.show()
     
     # %%
