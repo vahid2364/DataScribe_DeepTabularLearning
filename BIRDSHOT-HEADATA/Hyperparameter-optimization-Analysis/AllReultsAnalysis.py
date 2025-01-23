@@ -12,6 +12,7 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 from optuna.storages import RDBStorage
+import re
 
 plt.style.use('default')
 
@@ -147,9 +148,10 @@ if __name__ == "__main__":
         #trial_numbers_sorted, objective_values_sorted = collect_objective_values(study, sort_values=True)
     
         if len(trial_numbers_sorted) > 0:
-            # Remove 'distributed' and 'Optuna' from the study name for the label
-            label_name = study_info["label"]#.replace('distributed-', '').replace('-Optuna', '')
-            
+            ## Remove 'distributed' and 'Optuna' from the study name for the label
+            #label_name = study_info["label"]#.replace('distributed-', '').replace('-Optuna', '')
+            label_name = re.sub(r'[<>:"/\\|?*]', '_', study_info["label"]).replace(" ", "_")
+
             fig, ax = plt.subplots(figsize=(12, 8))
     
             plt.scatter(trial_numbers, objective_values, label=label_name, marker='s', lw=2.5)
@@ -201,12 +203,13 @@ if __name__ == "__main__":
             plt.tick_params(axis='both', which='minor', labelsize=20, width=2)  # Adjust `labelsize` as needed
             plt.legend(loc="upper right", fontsize=30)
             #plt.xlim([0,130])
-            #plt.ylim([0.0,5e-1])
+            #plt.ylim([15,100])
             plt.tight_layout()
-            plt.savefig("optuna-history-"+study_info["name"]+".png", dpi=300)
+            plt.savefig("optuna-history-"+label_name+".png", dpi=300)
             plt.show()
     
-    
+    pause
+
     
     # %% 
     
@@ -347,7 +350,7 @@ if __name__ == "__main__":
     plt.ylabel("Study")
     plt.title("Heatmap of Objective Values")
     plt.show()
-    
+        
     # %%
     
     # Create a boxplot for objective values of all studies

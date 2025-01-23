@@ -11,16 +11,18 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import joblib
-from sklearn.metrics import mean_absolute_error,mean_squared_error
 
 from scaling_utils2 import scale_data, descale_data
 
 
-def load_data(csv_file_path, input_columns, output_columns):
+def load_data(csv_file_path, input_columns):
     """Load and preprocess the dataset."""
     df = pd.read_csv(csv_file_path)
-    df = df.loc[:, ~(df == 0).all()]  # Drop columns with all zeros
-    df = df[input_columns + output_columns].dropna()
+    #df = df.loc[:, ~(df == 0).all()]  # Drop columns with all zeros
+    #df = df[input_columns + output_columns].dropna()
+    print('dataframe columns are:')
+    print(df.columns)
+
     print("\nDataFrame after dropping all-zero columns:")
     print(df)
     return df
@@ -71,11 +73,13 @@ def save_and_display_results(df, predictions_descaled, output_columns, file_name
 def process_target(csv_file_path, input_columns, output_columns, weight_folder, scale_folder, file_name):
     """Process a single target using the specified parameters."""
     # Load data
-    df = load_data(csv_file_path, input_columns, output_columns)
+    df = load_data(csv_file_path, input_columns)
     
+    df = df[input_columns]*100 # Reorder explicitly
+            
     # Load model and scalers
     model, input_scaler, output_scaler = load_model_and_scalers(weight_folder, scale_folder)
-    
+
     # Prepare input data
     conditional_parameters = np.array(df[input_columns][:])
     
@@ -83,77 +87,90 @@ def process_target(csv_file_path, input_columns, output_columns, weight_folder, 
     _, predictions_descaled = make_predictions(model, input_scaler, output_scaler, conditional_parameters)
     
     # Save and display results
-    save_and_display_results(df, predictions_descaled, output_columns, file_name)
+    #save_and_display_results(df, predictions_descaled, output_columns, file_name)
     
     return df, predictions_descaled
 
 
 if __name__ == "__main__":
     # Common configurations
-    CSV_FILE_PATH = '../data/HTMDEC_MasterTable_Iterations_v3_processed.csv'
+    CSV_FILE_PATH = 'input_data/filtered_htmdecy3_n7_d25_s6_7_t27000_TCeq.csv'
     INPUT_COLUMNS = ['Al', 'Co', 'Cr', 'Cu', 'Fe', 'Mn', 'Ni', 'V']
+    #Al	Co	Cr	Cu	Fe	Mn	Ni	V
+    # 'Al',  'Cu' = 0
     
     # Process Yield Strength (YS)
     YS_OUTPUT_COLUMNS = ['Yield Strength (MPa)']
     YS_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-YS-SMAPE/'
     YS_SCALE_FOLDER = os.path.join(YS_WEIGHT_FOLDER, 'scales')
-    df, predictions_descaled = process_target(CSV_FILE_PATH, INPUT_COLUMNS, YS_OUTPUT_COLUMNS, YS_WEIGHT_FOLDER, YS_SCALE_FOLDER, 'comparison_df1_YS.csv')
-    
-    # Calculate MAE
-    mae1 = mean_absolute_error(df[YS_OUTPUT_COLUMNS][:], predictions_descaled)
-    mse1 = mean_squared_error(df[YS_OUTPUT_COLUMNS][:], predictions_descaled)
-        
+    df, predictions_descaled1 = process_target(CSV_FILE_PATH, INPUT_COLUMNS, YS_OUTPUT_COLUMNS, YS_WEIGHT_FOLDER, YS_SCALE_FOLDER, 'comparison_df1_YS.csv')
+            
     # Process Ultimate Tensile Strength (UTS)
     UTS_OUTPUT_COLUMNS = ['UTS_True (Mpa)']
     UTS_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-UTS-SMAPE/'
     UTS_SCALE_FOLDER = os.path.join(UTS_WEIGHT_FOLDER, 'scales')
-    df, predictions_descaled = process_target(CSV_FILE_PATH, INPUT_COLUMNS, UTS_OUTPUT_COLUMNS, UTS_WEIGHT_FOLDER, UTS_SCALE_FOLDER, 'comparison_df2_UTS.csv')
-
-    # Calculate MAE
-    mae2 = mean_absolute_error(df[UTS_OUTPUT_COLUMNS][:], predictions_descaled)
-    mse2 = mean_squared_error(df[UTS_OUTPUT_COLUMNS][:], predictions_descaled)
+    df, predictions_descaled2 = process_target(CSV_FILE_PATH, INPUT_COLUMNS, UTS_OUTPUT_COLUMNS, UTS_WEIGHT_FOLDER, UTS_SCALE_FOLDER, 'comparison_df2_UTS.csv')
+    
+    ##
+    predictions_UTSYS_ratio = predictions_descaled2/predictions_descaled1
     
     # Process Elongation T
     ELON_OUTPUT_COLUMNS = ['Elong_T (%)']
     ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Elon T-SMAPE/'
     ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
-    df, predictions_descaled = process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df3_Elon.csv')
-    
-    # Calculate MAE
-    mae3 = mean_absolute_error(df[ELON_OUTPUT_COLUMNS][:], predictions_descaled)
-    mse3 = mean_squared_error(df[ELON_OUTPUT_COLUMNS][:], predictions_descaled)
-    
-    
+    df, predictions_descaled3 = process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df3_Elon.csv')
+        
     # Process Hardness 
-    ELON_OUTPUT_COLUMNS = ['Hardness (GPa) SRJT']
-    ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Hardness-SMAPE/'
-    ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
-    process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df4_Hardness.csv')
+    #ELON_OUTPUT_COLUMNS = ['Hardness (GPa) SRJT']
+    #ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Hardness-SMAPE/'
+    #ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
+    #process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df4_Hardness.csv')
     
     # Process Modulus 
-    ELON_OUTPUT_COLUMNS = ['Modulus (GPa) SRJT']
-    ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Modulus-SMAPE/'
-    ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
-    process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df4_Modulus.csv')
+    #ELON_OUTPUT_COLUMNS = ['Modulus (GPa) SRJT']
+    #ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Modulus-SMAPE/'
+    #ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
+    #process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df4_Modulus.csv')
     
     # Process Modulus 
     ELON_OUTPUT_COLUMNS = ['Avg HDYN/HQS']
     ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Avg HDYNHQSRatio-SMAPE/'
     ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
-    df, predictions_descaled = process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df5_AvgHDYNHQSRatio.csv')
-    
-    # Calculate MAE
-    mae4 = mean_absolute_error(df[ELON_OUTPUT_COLUMNS][:], predictions_descaled)
-    mse4 = mean_squared_error(df[ELON_OUTPUT_COLUMNS][:], predictions_descaled)
+    df, predictions_descaled4 = process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df5_AvgHDYNHQSRatio.csv')
+
+    # Process Modulus 
+    ELON_OUTPUT_COLUMNS = ['Depth of Penetration (mm) FE_Sim']
+    ELON_WEIGHT_FOLDER = '../Hyperparameter-optimization/Encoder-Decoder-FDN-Optuna-overcomplete-Depth of Penetration (mm) FE_Sim-SMAPE/'
+    ELON_SCALE_FOLDER = os.path.join(ELON_WEIGHT_FOLDER, 'scales')
+    df, predictions_descaled5 = process_target(CSV_FILE_PATH, INPUT_COLUMNS, ELON_OUTPUT_COLUMNS, ELON_WEIGHT_FOLDER, ELON_SCALE_FOLDER, 'comparison_df5_AvgHDYNHQSRatio.csv')
 
     
-    print("MAE and MSE:", mae1,mse1)
-    print("MAE and MSE:", mae2,mse2)
-    print("MAE and MSE:", mae3,mse3)
-    print("MAE and MSE:", mae4,mse4)
-
-    pause
-
+    #####
+    
+    # Assuming predictions_descaled1, predictions_descaled2, predictions_descaled3, predictions_descaled4 are available
+    # Example: YS_OUTPUT_COLUMNS corresponds to feature names for each prediction set
+    all_predictions = [predictions_descaled1, predictions_descaled2, predictions_UTSYS_ratio, predictions_descaled3, predictions_descaled4, predictions_descaled5]
+    all_output_columns = ['Yield Strength (MPa)', 'Ultimate Tensile Strength (MPa)', 'predictions_UTSYS_ratio', 'Elongation (%)', 'Avg HDYN/HQS', 'Depth of Penetration (mm) FE_Sim']
+    
+    # Create a DataFrame for each set of predictions
+    prediction_dfs = [
+        pd.DataFrame(predictions, columns=[f'Predicted {col}']) 
+        for predictions, col in zip(all_predictions, all_output_columns)
+    ]
+    
+    # Combine all prediction DataFrames into one
+    predictions_df = pd.concat(prediction_dfs, axis=1)
+    
+    # Merge the original DataFrame and predictions DataFrame
+    merged_df = pd.concat([df.reset_index(drop=True), predictions_df], axis=1)
+    
+    # Display and save the merged DataFrame
+    print("Merged DataFrame:")
+    print(merged_df)
+    
+    merged_df.to_csv('merged_comparison_all_predictions.csv', index=False)
+    print("Saved merged DataFrame to 'merged_comparison_all_predictions.csv'")
+    
     
     
     
