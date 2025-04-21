@@ -1,0 +1,7 @@
+\begin{tabular}{l|ccccc}
+\toprule
+Model Name & YS 1000C PRIOR & EQ 1273K Density (g/cc) & EQ 1273K THCD (W/mK) & Kou Criteria & 1300 Min Creep CB [1/s] \\
+\midrule
+Encoder-Decoder (1DCNN) & MSE: 4.348e+04 (R$^2$: 0.881) & MSE: 0.4662 (R$^2$: 0.833) & MSE: 22.76 (R$^2$: 0.872) & MSE: 4.483e+05 (R$^2$: -1.5) & MSE: 2.907e-23 (R$^2$: 0.201) \\
+\bottomrule
+\end{tabular}
