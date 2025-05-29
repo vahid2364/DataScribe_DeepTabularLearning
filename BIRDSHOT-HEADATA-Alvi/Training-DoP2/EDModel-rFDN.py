@@ -191,11 +191,13 @@ def create_fdn_model(trial):
 
 # %% LOAD DATA
 
-split_num = [0,4]
+split_num = [0,1,2,3,4]
 
 for idx in split_num:
 
     res_folder = "results"+str(idx)
+    os.makedirs(res_folder, exist_ok=True)
+    os.makedirs(res_folder+"/scales", exist_ok=True)
 
     fl_name = 'split_'+str(idx)+'_test.csv'
     test_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
@@ -214,9 +216,10 @@ for idx in split_num:
     output_columns = [
         #'Yield Strength (MPa)',
         #'UTS_True (Mpa)',
-        'Elong_T (%)',                          
+        #'Elong_T (%)',                          
         #'Hardness (GPa) SRJT', 
-        #'Modulus (GPa) SRJT'
+        #'Modulus (GPa) SRJT',
+        'Depth of Penetration (mm) FE_Sim'
     ]
             
     # Drop columns with all zeros
@@ -239,18 +242,26 @@ for idx in split_num:
     train_data = train_data.dropna(subset=output_columns)
     test_data = test_data.dropna(subset=output_columns)
     
-    train_data[input_columns] = scaler_X.fit_transform(train_data[input_columns])
-    test_data[input_columns] = scaler_X.transform(test_data[input_columns])
+    # Scale inputs
+    train_data_scaled = train_data.copy()
+    test_data_scaled = test_data.copy()
+
+    train_data_scaled[input_columns] = scaler_X.fit_transform(train_data[input_columns])
+    test_data_scaled[input_columns] = scaler_X.transform(test_data[input_columns])
     
-    train_data[output_columns] = scaler_y.fit_transform(train_data[output_columns])
-    test_data[output_columns] = scaler_y.transform(test_data[output_columns])
+    train_data_scaled[output_columns] = scaler_y.fit_transform(train_data[output_columns])
+    test_data_scaled[output_columns] = scaler_y.transform(test_data[output_columns])
     
     # Then split into inputs and outputs
-    X_train = train_data[input_columns].to_numpy()
-    y_train = train_data[output_columns].to_numpy()
-    X_test = test_data[input_columns].to_numpy()
-    y_test = test_data[output_columns].to_numpy()
+    X_train = train_data_scaled[input_columns].to_numpy()
+    y_train = train_data_scaled[output_columns].to_numpy()
+    X_test = test_data_scaled[input_columns].to_numpy()
+    y_test = test_data_scaled[output_columns].to_numpy()
     
+    import joblib
+    # Save input and output scaler
+    joblib.dump(scaler_X, res_folder+'/scales/input_scaler.save')
+    joblib.dump(scaler_y, res_folder+'/scales/output_scaler.save')
     
     print("\nDataFrame after dropping all-zero columns:")
     print(X_train)
@@ -258,7 +269,8 @@ for idx in split_num:
     print(input_columns)
     print("\nOutput Columns:")
     print(output_columns)
-
+    
+    
 # %%
 
     study_infos = [
@@ -459,6 +471,34 @@ for idx in split_num:
         # Predictions
         y_pred = best_model.predict(X_test)
         y_pred_train = best_model.predict(X_train)
+    
+        # %%
+        
+        # Inverse transform predictions and true values
+        y_pred_rescaled = scaler_y.inverse_transform(y_pred)
+        y_test_rescaled = scaler_y.inverse_transform(y_test)
+        
+        y_pred_train_rescaled = scaler_y.inverse_transform(y_pred_train)
+        y_train_rescaled = scaler_y.inverse_transform(y_train)
+    
+        X_test_rescaled = scaler_X.inverse_transform(X_test)
+        X_train_rescaled = scaler_X.inverse_transform(X_train)
+        
+        # Create test results DataFrame
+        df_test_results = pd.DataFrame(X_test_rescaled, columns=input_columns)
+        df_test_results[['Actual_' + col for col in output_columns]] = y_test_rescaled
+        df_test_results[['Predicted_' + col for col in output_columns]] = y_pred_rescaled
+        
+        # Create train results DataFrame
+        df_train_results = pd.DataFrame(X_train_rescaled, columns=input_columns)
+        df_train_results[['Actual_' + col for col in output_columns]] = y_train_rescaled
+        df_train_results[['Predicted_' + col for col in output_columns]] = y_pred_train_rescaled
+        
+        with pd.ExcelWriter(res_folder+'/model_predictions'+str(run)+'.xlsx') as writer:
+            df_train_results.to_excel(writer, sheet_name='Train Results', index=False)
+            df_test_results.to_excel(writer, sheet_name='Test Results', index=False)
+            
+        # %%
     
         # Metrics
         mse_test = mean_squared_error(y_test, y_pred)
