@@ -1,0 +1,13 @@
+{
+    "lambda": 0.00014964186063059335,
+    "drop_out_rate": 0.30000000000000004,
+    "alpha": 0.04786471960454705,
+    "learning_rate": 0.0018248673842574939,
+    "optimizer": "adam",
+    "num_layers_encoder": 4,
+    "num_layers_decoder": 5,
+    "encoder_neurons_layer_1": 188,
+    "latent_dim": 1539,
+    "batch_size": 32,
+    "epochs": 200
+}

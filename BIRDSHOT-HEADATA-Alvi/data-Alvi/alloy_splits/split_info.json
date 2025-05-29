@@ -1,0 +1,46 @@
+{
+  "n_splits": 5,
+  "test_size": 0.2,
+  "splits": [
+    {
+      "split_idx": 0,
+      "seed": 42,
+      "train_file": "alloy_splits/split_0_train.csv",
+      "test_file": "alloy_splits/split_0_test.csv",
+      "train_size": 117,
+      "test_size": 30
+    },
+    {
+      "split_idx": 1,
+      "seed": 43,
+      "train_file": "alloy_splits/split_1_train.csv",
+      "test_file": "alloy_splits/split_1_test.csv",
+      "train_size": 117,
+      "test_size": 30
+    },
+    {
+      "split_idx": 2,
+      "seed": 44,
+      "train_file": "alloy_splits/split_2_train.csv",
+      "test_file": "alloy_splits/split_2_test.csv",
+      "train_size": 117,
+      "test_size": 30
+    },
+    {
+      "split_idx": 3,
+      "seed": 45,
+      "train_file": "alloy_splits/split_3_train.csv",
+      "test_file": "alloy_splits/split_3_test.csv",
+      "train_size": 117,
+      "test_size": 30
+    },
+    {
+      "split_idx": 4,
+      "seed": 46,
+      "train_file": "alloy_splits/split_4_train.csv",
+      "test_file": "alloy_splits/split_4_test.csv",
+      "train_size": 117,
+      "test_size": 30
+    }
+  ]
+}
