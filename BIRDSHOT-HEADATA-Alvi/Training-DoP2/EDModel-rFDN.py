@@ -204,10 +204,13 @@ for idx in split_num:
     fl_name = 'split_0_train.csv'
     train_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
     
+    #pause
+
     # df
     test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
     train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
     
+
     # Define input and output columns
     input_columns = [
         'Al','Co','Cr','Cu','Fe','Mn','Ni','V'
@@ -221,10 +224,16 @@ for idx in split_num:
         #'Modulus (GPa) SRJT',
         'Depth of Penetration (mm) FE_Sim'
     ]
+    
+    #pause
+
             
     # Drop columns with all zeros
     test_data = test_data.loc[:, ~(test_data == 0).all()]
     train_data = train_data.loc[:, ~(train_data == 0).all()]
+    
+    #pause
+
     
     #columns_to_keep = input_columns.tolist() + output_columns.tolist()
     columns_to_keep = input_columns + output_columns
@@ -241,7 +250,7 @@ for idx in split_num:
     # Drop rows where target column is NaN
     train_data = train_data.dropna(subset=output_columns)
     test_data = test_data.dropna(subset=output_columns)
-    
+        
     # Scale inputs
     train_data_scaled = train_data.copy()
     test_data_scaled = test_data.copy()
@@ -269,6 +278,7 @@ for idx in split_num:
     print(input_columns)
     print("\nOutput Columns:")
     print(output_columns)
+    
     
     
 # %%

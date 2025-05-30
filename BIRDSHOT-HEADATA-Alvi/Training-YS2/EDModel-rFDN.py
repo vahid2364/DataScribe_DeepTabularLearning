@@ -203,10 +203,10 @@ for idx in split_num:
     test_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
     fl_name = 'split_0_train.csv'
     train_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
-    
+        
     # df
-    test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
-    train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "BBC "])]
+    #train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "BBC "])]
     
     # Define input and output columns
     input_columns = [
@@ -220,11 +220,11 @@ for idx in split_num:
         #'Hardness (GPa) SRJT', 
         #'Modulus (GPa) SRJT'
     ]
-            
+         
     # Drop columns with all zeros
     test_data = test_data.loc[:, ~(test_data == 0).all()]
     train_data = train_data.loc[:, ~(train_data == 0).all()]
-    
+        
     #columns_to_keep = input_columns.tolist() + output_columns.tolist()
     columns_to_keep = input_columns + output_columns
     
@@ -241,10 +241,14 @@ for idx in split_num:
     train_data = train_data.dropna(subset=output_columns)
     test_data = test_data.dropna(subset=output_columns)
     
+    print("\nAFTER dropping NaNs:")
+    print(f"Train shape: {train_data.shape}")
+    print(f"Test shape: {test_data.shape}")
+        
     # Scale inputs
     train_data_scaled = train_data.copy()
     test_data_scaled = test_data.copy()
-
+    
     train_data_scaled[input_columns] = scaler_X.fit_transform(train_data[input_columns])
     test_data_scaled[input_columns] = scaler_X.transform(test_data[input_columns])
     
@@ -269,8 +273,9 @@ for idx in split_num:
     print("\nOutput Columns:")
     print(output_columns)
     
+    pause
     
-
+    
 # %%
 
     study_infos = [
@@ -542,7 +547,7 @@ for idx in split_num:
         plt.xlabel("Actual")
         plt.ylabel("Predicted")
         plt.title(f"Parity Plot - Run {run}")
-        plt.legend()
+        plt.legend(loc='best')
         plt.tight_layout()
         plt.savefig(res_folder+f'/plots/parity_run{run}.png')
         plt.close()
