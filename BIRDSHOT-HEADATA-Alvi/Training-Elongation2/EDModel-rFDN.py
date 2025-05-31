@@ -205,8 +205,8 @@ for idx in split_num:
     train_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
     
     # df
-    test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
-    train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
     
     # Define input and output columns
     input_columns = [
@@ -536,7 +536,7 @@ for idx in split_num:
         plt.xlabel("Actual")
         plt.ylabel("Predicted")
         plt.title(f"Parity Plot - Run {run}")
-        plt.legend()
+        plt.legend(loc='lower right')
         plt.tight_layout()
         plt.savefig(res_folder+f'/plots/parity_run{run}.png')
         plt.close()
