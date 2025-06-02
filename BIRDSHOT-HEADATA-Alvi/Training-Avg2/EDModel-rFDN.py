@@ -205,8 +205,8 @@ for idx in split_num:
     train_data = pd.read_csv('../data-Alvi/alloy_splits/'+str(fl_name))
     
     # df
-    test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
-    train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
     
     # Define input and output columns
     input_columns = [
@@ -242,6 +242,9 @@ for idx in split_num:
     train_data = train_data.dropna(subset=output_columns)
     test_data = test_data.dropna(subset=output_columns)
     
+    print('train data size:',len(train_data))
+    print('test data size:',len(test_data))
+        
     # Scale inputs
     train_data_scaled = train_data.copy()
     test_data_scaled = test_data.copy()
@@ -257,6 +260,7 @@ for idx in split_num:
     y_train = train_data_scaled[output_columns].to_numpy()
     X_test = test_data_scaled[input_columns].to_numpy()
     y_test = test_data_scaled[output_columns].to_numpy()
+    
     
     import joblib
     # Save input and output scaler
@@ -395,7 +399,7 @@ for idx in split_num:
     plt.plot([min(y_train.flatten()), max(y_train.flatten())],
              [min(y_train.flatten()), max(y_train.flatten())], color='blue', linestyle=':', linewidth=2)
     
-    plt.xlabel("Actual: YS")
+    plt.xlabel("Actual: Avg HDYN/HQS")
     plt.ylabel("Predicted")
     #plt.title("Parity Plot")
     #plt.grid(True)
@@ -537,7 +541,7 @@ for idx in split_num:
         plt.xlabel("Actual")
         plt.ylabel("Predicted")
         plt.title(f"Parity Plot - Run {run}")
-        plt.legend()
+        plt.legend(loc='lower right')
         plt.tight_layout()
         plt.savefig(res_folder+f'/plots/parity_run{run}.png')
         plt.close()

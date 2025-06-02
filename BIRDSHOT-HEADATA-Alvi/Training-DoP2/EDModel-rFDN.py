@@ -207,8 +207,8 @@ for idx in split_num:
     #pause
 
     # df
-    test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
-    train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #test_data  = test_data[test_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
+    #train_data = train_data[train_data["Iteration"].isin(["AAA","AAB","AAC","AAD","AAE","BBA", "BBB", "BBC", "CBA"])]
     
 
     # Define input and output columns
@@ -406,7 +406,7 @@ for idx in split_num:
     plt.plot([min(y_train.flatten()), max(y_train.flatten())],
              [min(y_train.flatten()), max(y_train.flatten())], color='blue', linestyle=':', linewidth=2)
     
-    plt.xlabel("Actual: YS")
+    plt.xlabel("Actual: DoP")
     plt.ylabel("Predicted")
     #plt.title("Parity Plot")
     #plt.grid(True)
@@ -548,7 +548,7 @@ for idx in split_num:
         plt.xlabel("Actual")
         plt.ylabel("Predicted")
         plt.title(f"Parity Plot - Run {run}")
-        plt.legend()
+        plt.legend(loc='lower right')
         plt.tight_layout()
         plt.savefig(res_folder+f'/plots/parity_run{run}.png')
         plt.close()
