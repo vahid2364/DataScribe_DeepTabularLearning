@@ -120,14 +120,12 @@ The dataset includes tabular materials data with features such as:
 1. Missing values are handled via interpolation.
 2. Features are normalized using quantile transformation for skewed distributions.
 
-For more details, see the [data README](data/README.md).
-
 ---
 
 ## 🚀 Models
 
 The repository implements and benchmarks the following models:
-- **Encoder-Decoder (asymmetric overcomplete) regularized Dense Neural Network (rDN)**: Standard fully connected architecture.
+- **Encoder-Decoder (asymmetric overcomplete) regularized Dense Neural Network (rDN)**: Standard regularized dense architecture.
 - **Encoder-Decoder Disjunctive Normal Form Network (DNF-Net)**: Captures logical relationships in tabular data.
 - **Encoder-Decoder (1D-CNN)**: Extracts local patterns and hierarchical feature representations using 1D convolutional filters, suitable for structured tabular data with implicit ordering or grouped feature patterns..
 - **TabNet**: Attention-based model that performs sequential feature selection, enabling interpretability while capturing complex feature interactions in tabular data.
@@ -139,8 +137,6 @@ The repository implements and benchmarks the following models:
 - **Mean Squared Logarithmic Error (MSLE)**
 - **R-squared (R²)**
 - **Symmetric Mean Absolute Percentage Error (SMAPE)**
-
-See [models README](models/README.md) for implementation details.
 
 ---
 
