@@ -1,0 +1,7 @@
+Model,Best Loss Value,Optimizer,Best Trial Duration,Train R²,Test R²,Train SMAPE,Test SMAPE
+Ultimate Tensile Strength (UTS),11.1,adam,5.50,0.9,0.6,11.1,31.3
+Elongation (T),15.5,adam,11.90,0.8,0.3,15.5,30.7
+Modulus,19.0,adam,7.20,0.8,-0.2,19.0,32.1
+Yield Strength (YS),20.4,adam,5.70,0.9,-0.2,20.4,31.8
+Hardness,21.6,adam,5.80,0.9,0.4,21.6,27.3
+Avg HDYN/HQS Ratio,30.1,adam,4.80,0.5,0.2,30.1,48.2
