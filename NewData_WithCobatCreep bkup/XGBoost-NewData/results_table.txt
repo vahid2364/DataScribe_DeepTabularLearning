@@ -1,0 +1,7 @@
+\begin{tabular}{l|ccccc}
+\toprule
+Model Name & YS 1000C PRIOR & EQ 1273K Density (g/cc) & EQ 1273K THCD (W/mK) & Kou Criteria & 1300 Min Creep CB [1/s] \\
+\midrule
+XGBoost & MSE: 1613 (R$^2$: 0.9956) & MSE: 0.1684 (R$^2$: 0.9398) & MSE: 13.27 (R$^2$: 0.9253) & MSE: 2.613e+04 (R$^2$: 0.8542) & MSE: 0.1113 (R$^2$: -3.061e+21) \\
+\bottomrule
+\end{tabular}
