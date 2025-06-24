@@ -35,3 +35,11 @@ Encoder-Decoder-Progress.pptx
 ~$Encoder-Decoder-Progress.pptx
 BIRDSHOT-HEADATA/Hyperparameter-optimization/R2_Optimization/
 BIRDSHOT-HEADATA/bckup-DatasetandModel-v1/
+SMA-DATA/
+*.zip
+*.db
+*.jpg
+*.zip
+*.db
+*.jpg
+.DS_Store
