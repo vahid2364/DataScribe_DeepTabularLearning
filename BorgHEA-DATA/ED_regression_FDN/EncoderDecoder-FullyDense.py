@@ -352,7 +352,7 @@ np.random.seed(45)
 tf.random.set_seed(45)
 
 # Load the CSV file
-csv_file_path = '../Borg_df_updated.csv'
+csv_file_path = '../data/Borg_df_updated.csv'
 df = pd.read_csv(csv_file_path, usecols=lambda column: column not in ['Unnamed: 0.3'])
 
 
@@ -699,7 +699,7 @@ callbacks = [
 # Train the autoencoder
 history = FD_EncoderDecoder.fit(
     X_train, y_train,
-    epochs=550,
+    epochs=1050,
     batch_size=32,
     validation_split=0.1,
     shuffle=True,
@@ -775,6 +775,20 @@ y_test_original = descale_data(y_test,
                  apply_sigmoid=False,
                  data_type='output'
                  )
+
+# Make predictions
+predictions_scaled_training = FD_EncoderDecoder.predict(X_train)
+
+y_train_original = descale_data(predictions_scaled_training,
+                 input_scaler=input_scaler, output_scaler=output_scaler,
+                 apply_dsc=True, 
+                 apply_qt=False, qt_inputs=qt_inputs, qt_outputs=qt_outputs, 
+                 apply_pt=False, pt_inputs=None, pt_outputs=None, 
+                 apply_log1p=False, 
+                 apply_sigmoid=False,
+                 data_type='output'
+                 )
+
 
 # Calculate Mean Squared Error (MSE)
 mse = mean_squared_error(y_test_original, predictions)
@@ -934,16 +948,17 @@ for idx in range(outputs_scaled.shape[1]):
     # Annotate MSE on the plot
     mse = mean_squared_error(y_test[:, idx], predictions_scaled[:, idx])
     r2 = r2_score(y_test[:, idx], predictions_scaled[:, idx])
-    plt.text(0.05, 0.95, f'MSE: {mse:.3f}', transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
-    plt.text(0.05, 0.92, f'r$^2$ : {r2 :.3f}', transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
-
+    plt.text(0.05, 0.95, f'MSE: {mse:.3f}', transform=plt.gca().transAxes, fontsize=15, verticalalignment='top')
+    plt.text(0.05, 0.91, f'r$^2$ : {r2 :.3f}', transform=plt.gca().transAxes, fontsize=15, verticalalignment='top')
+    
     ## Plot predictions vs actual outputs for the first output feature
     plt.scatter(y_test[:, idx], predictions_scaled[:, idx], color='gray')
+    plt.scatter(y_train[:, idx], predictions_scaled_training[:, idx], color='blue')
     #plt.plot([np.min(y_test[:, idx]),np.max(y_test[:, idx]) ], [np.min(predictions_scaled[:, idx]),np.max(predictions_scaled[:, idx]) ], c='black')
     plt.plot([0,1], [0,1], c='black')
 
-    plt.xlabel('Actual Outputs')
-    plt.ylabel('Predicted Outputs')
+    plt.xlabel(f'Actual: {output_columns[idx]}')
+    plt.ylabel('Predicted')
 
     # Increase box line width to 2.5
     ax = plt.gca()
@@ -953,7 +968,7 @@ for idx in range(outputs_scaled.shape[1]):
     ax.spines['left'].set_linewidth(2.5)
     
     plt.tight_layout()
-    plt.savefig('parityplots-scaled/scatterplot_'+str(idx)+'.jpg')
+    plt.savefig('parityplots-scaled/scatterplot_'+str(idx)+'_FDN_MPEA.jpg', dpi=300)
     
 
 os.makedirs('parityplots-original', exist_ok=True)
@@ -963,6 +978,7 @@ for idx in range(outputs_scaled.shape[1]):
     plt.figure(figsize=(7, 6))
 
     try:
+        
         # Safeguard log against zero or negative values
         y_test_log_safe = np.where(y_test_original[:, idx] <= 0, 1e-10, y_test_original[:, idx])
         predictions_log_safe = np.where(predictions[:, idx] <= 0, 1e-10, predictions[:, idx])
@@ -981,13 +997,13 @@ for idx in range(outputs_scaled.shape[1]):
         rmsle = np.sqrt(msle)
 
         # Annotate MSLE, RMSLE, and log R² on the plot
-        plt.text(0.05, 0.95, f'MSLE: {msle:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.91, f'RMSLE: {rmsle:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.87, f'log R$^2$ : {log_r2:.3f}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.82, f'GMAE: {gmae:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.95, f'MSLE: {msle:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.91, f'RMSLE: {rmsle:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.87, f'log R$^2$ : {log_r2:.2f}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.82, f'GMAE: {gmae:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
         plt.text(0.05, 0.78, f'SMAPE: {smape:.2f}%', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
         plt.text(0.05, 0.74, f'MASE: {mase:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.70, f'RMSPE: {rmspe:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.70, f'RMSPE: {rmspe:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
     
     except ValueError:
 
@@ -1002,12 +1018,12 @@ for idx in range(outputs_scaled.shape[1]):
         rmspe = np.sqrt(np.mean(np.square((y_test_original[:, idx] - predictions[:, idx]) / y_test_original[:, idx])))
 
         # Annotate MSE, GMAE, SMAPE, MASE, and RMSPE on the plot
-        plt.text(0.05, 0.95, f'MSE: {mse:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.91, f'R$^2$ : {r2:.3f}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.87, f'GMAE: {gmae:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.95, f'MSE: {mse:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.91, f'R$^2$ : {r2:.2f}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.87, f'GMAE: {gmae:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
         plt.text(0.05, 0.82, f'SMAPE: {smape:.2f}%', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
         plt.text(0.05, 0.78, f'MASE: {mase:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
-        plt.text(0.05, 0.74, f'RMSPE: {rmspe:.3g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
+        plt.text(0.05, 0.74, f'RMSPE: {rmspe:.2g}', transform=plt.gca().transAxes, fontsize=14, verticalalignment='top')
 
     # Plot predictions vs actual outputs
     plt.scatter(y_test_original[:, idx], predictions[:, idx])
@@ -1026,12 +1042,12 @@ for idx in range(outputs_scaled.shape[1]):
     ax.spines['left'].set_linewidth(2)
     
     # Set labels and title
-    plt.xlabel(f'Actual Outputs: {output_columns[idx]}')
-    plt.ylabel('Predicted Outputs')
+    plt.xlabel(f'Actual: {output_columns[idx]}')
+    plt.ylabel('Predicted')
     plt.tight_layout()
 
     # Save the figure
-    plt.savefig(f'parityplots-original/scatterplot_{idx}.jpg')
+    plt.savefig(f'parityplots-original/scatterplot_original_{idx}_FDN_MPEA.jpg', dpi=300)
     plt.show()
 
 # %%

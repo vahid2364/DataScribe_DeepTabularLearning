@@ -208,7 +208,7 @@ if __name__ == "__main__":
             plt.savefig("optuna-history-"+label_name+".png", dpi=300)
             plt.show()
     
-    pause
+    
 
     
     # %% 
@@ -270,11 +270,11 @@ if __name__ == "__main__":
         
         best_loss_values.append({
             "Model": study_info["label"], 
-            #"Best Loss Value": round(best_loss, 1),
+            "Best Loss Value": round(best_loss, 1),
             "Optimizer": best_optimizer,
             "Best Trial Duration": round(best_trial_duration, 1),
-            #"Train R²": round(train_r2, 1),  # Add train_r2
-            #"Test R²": round(test_r2, 1),  # Add test_r2
+            "Train R²": round(train_r2, 1),  # Add train_r2
+            "Test R²": round(test_r2, 1),  # Add test_r2
             "Train SMAPE": round(smape_train, 1),  # Add smape_train
             "Test SMAPE": round(smape_test, 1),  # Add smape_test
             #"Avg. Convergence Rate": round(avg_convergence_rate, 1)  # Add avg_convergence_rate
@@ -288,8 +288,12 @@ if __name__ == "__main__":
     #df_best_losses["Train R²"] = df_best_losses["Train R²"].apply(lambda x: f"{x:.3f}" if pd.notnull(x) else x)
     #df_best_losses["Avg. Convergence Rate"] = df_best_losses["Avg. Convergence Rate"].apply(lambda x: f"{x:.1f}" if pd.notnull(x) else x)
     
+    
+    
     # Sort the DataFrame based on the 'Best Loss Value' column in ascending order
     df_best_losses_sorted = df_best_losses.sort_values(by="Train SMAPE", ascending=True)
+    
+    df_best_losses_sorted.to_csv("df_best_losses_sorted.csv", index=False)
     
     # Display the sorted DataFrame
     print(df_best_losses_sorted)

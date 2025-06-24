@@ -149,7 +149,7 @@ print(f"Total number of NaN values in the DataFrame: {total_nan}")
 
 # Save the DataFrame to a CSV file
 filepath_processed = os.path.splitext(file_path)[0] + '_processed.csv'
-df_cleaned_filled.to_csv(filepath_processed, index=False)
+#df_cleaned_filled.to_csv(filepath_processed, index=False)
 
 print(f"Interpolated DataFrame saved to {filepath_processed}")
 
@@ -158,7 +158,30 @@ df_cleaned_filled.describe()
 # Convert interpolated DataFrame to LaTeX table
 latex_table = df_cleaned_filled.to_latex(index=False, float_format="%.1f", column_format="l" * len(df_cleaned_filled.columns))
 
+# %%
 
+from scipy.stats import skew, kurtosis
+
+def calculate_feature_complexity(df):
+    """
+    Calculates feature complexity for each column in the dataframe.
+    Feature complexity = |skewness| + |kurtosis - 3|
+    Returns a DataFrame sorted by complexity.
+    """
+    complexity = {}
+    for col in df.columns:
+        if pd.api.types.is_numeric_dtype(df[col]):
+            sk = skew(df[col].dropna())
+            kurt = kurtosis(df[col].dropna(), fisher=False)  # Pearson definition
+            complexity[col] = abs(sk) + abs(kurt - 3)
+
+    return pd.DataFrame.from_dict(complexity, orient='index', columns=['Feature Complexity'])
+
+# Example usage:
+feature_complexity_df = calculate_feature_complexity(df_cleaned_filled)
+print(feature_complexity_df)
+
+pause
 # %% Latex Table for paper
 
 # Select only the required columns
@@ -176,10 +199,21 @@ selected_columns = [
 # Calculate extended statistical summary with skewness and kurtosis
 summary_df = df_cleaned_filled[selected_columns].agg(['mean', 'std', 'min', 'max', 'median', 'skew', 'kurtosis']).T
 
+# Evaluate feature complexity:
+feature_complexity_df = calculate_feature_complexity(df_cleaned_filled[selected_columns])
+print(feature_complexity_df)
+
 # Optionally, include 25%, 50%, and 75% percentiles
 percentiles = df_cleaned_filled[selected_columns].describe(percentiles=[0.25, 0.5, 0.75]).T
 summary_df['25%'] = percentiles['25%']
 summary_df['75%'] = percentiles['75%']
+
+# Ensure same index alignment
+summary_df = pd.concat([summary_df, feature_complexity_df], axis=1)
+# Move 'Feature Complexity' column to the end
+feature_col = summary_df.pop('Feature Complexity')
+summary_df['Feature Complexity'] = feature_col
+
 
 # Generate LaTeX table with skewness and kurtosis, using .2g format
 latex_table = r"""
@@ -188,15 +222,15 @@ latex_table = r"""
     \caption{Extended Statistical Summary of the Dataset including Skewness and Kurtosis}
     \scriptsize
     \label{tab:extended_data_stats_skew_kurt}
-    \begin{tabular}{lccccccccc}
+    \begin{tabular}{lcccccccccc}
         \toprule
-        \textbf{Feature} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Max} & \textbf{Median} & \textbf{25\%} & \textbf{75\%} & \textbf{Skewness} & \textbf{Kurtosis} \\
+        \textbf{Feature} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Max} & \textbf{Median} & \textbf{25\%} & \textbf{75\%} & \textbf{Skewness} & \textbf{Kurtosis} & \textbf{Feature Complexity}  \\
         \midrule
 """
 
 # Populate the LaTeX table with the extended statistical summary using .2g format
 for feature in summary_df.index:
-    latex_table += f"        {feature} & {summary_df.loc[feature, 'mean']:.2g} & {summary_df.loc[feature, 'std']:.2g} & {summary_df.loc[feature, 'min']:.2g} & {summary_df.loc[feature, 'max']:.2g} & {summary_df.loc[feature, 'median']:.2g} & {summary_df.loc[feature, '25%']:.2g} & {summary_df.loc[feature, '75%']:.2g} & {summary_df.loc[feature, 'skew']:.2g} & {summary_df.loc[feature, 'kurtosis']:.2g} \\\\\n"
+    latex_table += f"        {feature} & {summary_df.loc[feature, 'mean']:.2g} & {summary_df.loc[feature, 'std']:.2g} & {summary_df.loc[feature, 'min']:.2g} & {summary_df.loc[feature, 'max']:.2g} & {summary_df.loc[feature, 'median']:.2g} & {summary_df.loc[feature, '25%']:.2g} & {summary_df.loc[feature, '75%']:.2g} & {summary_df.loc[feature, 'skew']:.2f} & {summary_df.loc[feature, 'kurtosis']:.2f} & {summary_df.loc[feature, 'Feature Complexity']:.1f}  \\\\\n"
 
 # End of the table
 latex_table += r"""
@@ -208,7 +242,9 @@ latex_table += r"""
 # Print LaTeX table
 print(latex_table)
 
+
 # %%
+
 
 import os
 
