@@ -14,11 +14,11 @@ Department of Materials Science & Engineering, Texas A&M University.
 
 ## 📖 Overview
 
-This project addresses the challenges in tabular materials science data, including extreme skewness, multimodal distributions, and complex feature interactions. The repository implements several machine learning models, ranging from classical tree-based methods (e.g., XGBoost) to advanced deep learning architectures (e.g., encoder-decoder models, TabNet, and Variational Autoencoders).
+This project addresses the challenges in tabular materials science data, including extreme skewness, and complex feature interactions. The repository implements several machine learning models, ranging from classical tree-based methods (e.g., XGBoost) to advanced deep learning architectures (e.g., encoder-decoder models, TabNet, and Variational Autoencoders) on various materials science datasets.
 
 Key features of the project:
 - **Tabular data preprocessing** for skewness and outliers.
-- **Benchmarking of deep learning models** (e.g., Fully Dense Networks, Disjunctive Normal Form Networks, TabNet).
+- **Benchmarking of deep learning models** (e.g., regularized Dense Networks, Disjunctive Normal Form Networks, TabNet).
 - **Bayesian optimization** for hyperparameter tuning.
 - Comparative analysis of predictive performance and computational efficiency.
 
@@ -26,33 +26,49 @@ Key features of the project:
 
 ## 📂 Repository Structure
 
+The repository currently includes multiple datasets, e.g., ATLAS-RHEA, BIRDSHOT, and MPEA. Each dataset folder contains several models along with their corresponding Bayesian hyperparameter optimization workflows and post-processing results. Below is an example folder structure:
+
 ```
 .
-├── data/
-│   ├── raw/                       # Raw input data files
-│   ├── processed/                 # Preprocessed data files
-│   └── README.md                  # Details about datasets
-├── models/
-│   ├── encoder_decoder.py         # Encoder-Decoder implementation
-│   │          ├── Fully Dense architecture
-│   │          ├── DNNF architecture
-│   │          └── 1D-CNN architecture
-│   │          
-│   ├── tabnet.py                  # TabNet model
-│   ├── vae.py                     # Variational Autoencoder implementation
-│   ├── xgboost_baseline.py        # XGBoost baseline model
-│   └── utils.py                   # Utility functions for training and evaluation
-├── results/
-│   ├── figures/                   # Figures and plots
-│   ├── tables/                    # Results tables (e.g., metrics, hyperparameters)
-│   └── README.md                  # Description of results
-├── notebooks/
-│   ├── 01_data_exploration.ipynb  # Exploratory Data Analysis (EDA)
-│   ├── 02_model_training.ipynb    # Model training and evaluation
-│   ├── 03_hyperparameter_tuning.ipynb  # Hyperparameter optimization using TPE
-│   └── 04_results_visualization.ipynb  # Visualization of model performance
-├── README.md                      # Project documentation
-└── requirements.txt               # Python dependencies
+├── datasets/
+│   ├─── ATLAS-RHEA/
+│   │    ├── data/
+│   │    │      ├── raw/                       # Raw input data files
+│   │    │      ├── processed/                 # Preprocessed data files
+│   │    │      └── README.md                  # Details about datasets
+│   │    │
+│   │    ├── models/               # Trained models for ATLAS-RHEA
+│   │    │      │
+│   │    │      ├── encoder_decoder.py         # Encoder-Decoder implementation
+│   │    │      │       ├── Fully Dense architecture
+│   │    │      │       ├── DNNF architecture
+│   │    │      │       └── 1D-CNN architecture
+│   │    │      │    
+│   │    │      ├── tabnet.py                  # TabNet model
+│   │    │      ├── vae.py                     # Variational Autoencoder implementation
+│   │    │      ├── xgboost_baseline.py        # XGBoost baseline model
+│   │    │      └── utils.py                   # Utility functions for training and evaluation
+│   │    │
+│   │    ├── bayes_opt/             # Bayesian optimization scripts and results
+│   │    └── postprocessing/        # Analysis and visualizations
+│   │
+│   ├── BIRDSHOT/
+│   │   ├── data/
+│   │   ├── models/
+│   │   ├── bayes_opt/
+│   │   └── postprocessing/
+│   │
+│   └── MPEA/
+│       ├── data/
+│       ├── models/
+│       ├── bayes_opt/
+│       └── postprocessing/
+│
+├── standalone software/
+│   
+│
+├── README.md                      # Project overview and instructions
+└── requirements.txt               # Python package requirements
 ```
 
 ---
@@ -85,7 +101,17 @@ Key features of the project:
 
 ## 📊 Datasets
 
-### Description
+### ATLAS-RHEA Description
+The dataset includes tabular materials data with features such as:
+- **Compositional information**: Nb, Cr, V, W, Zr.
+- **Material properties**: Thermal conductivity, density, yield strength, creep rate.
+
+### BIRDSHOT Description
+The dataset includes tabular materials data with features such as:
+- **Compositional information**: Nb, Cr, V, W, Zr.
+- **Material properties**: Thermal conductivity, density, yield strength, creep rate.
+
+### BORG-HEA Description
 The dataset includes tabular materials data with features such as:
 - **Compositional information**: Nb, Cr, V, W, Zr.
 - **Material properties**: Thermal conductivity, density, yield strength, creep rate.
@@ -101,14 +127,16 @@ For more details, see the [data README](data/README.md).
 ## 🚀 Models
 
 The repository implements and benchmarks the following models:
-- **XGBoost**: Baseline tree-based model.
-- **Fully Dense Neural Network (FDN)**: Standard fully connected architecture.
-- **Disjunctive Normal Form Network (DNF-Net)**: Captures logical relationships in tabular data.
-- **TabNet**: Attention-based feature selection for interpretability.
+- **Encoder-Decoder (asymmetric overcomplete) regularized Dense Neural Network (rDN)**: Standard fully connected architecture.
+- **Encoder-Decoder Disjunctive Normal Form Network (DNF-Net)**: Captures logical relationships in tabular data.
+- **Encoder-Decoder (1D-CNN)**: Extracts local patterns and hierarchical feature representations using 1D convolutional filters, suitable for structured tabular data with implicit ordering or grouped feature patterns..
+- **TabNet**: Attention-based model that performs sequential feature selection, enabling interpretability while capturing complex feature interactions in tabular data.
 - **Variational Autoencoder (VAE)**: Generative model for handling uncertainty.
+- **XGBoost**: Baseline tree-based model.
 
 ### Key Metrics
 - **Mean Squared Error (MSE)**
+- **Mean Squared Logarithmic Error (MSLE)**
 - **R-squared (R²)**
 - **Symmetric Mean Absolute Percentage Error (SMAPE)**
 
@@ -121,12 +149,11 @@ See [models README](models/README.md) for implementation details.
 1. **Performance Comparison**:
    - XGBoost achieves the best computational efficiency and strong predictive performance.
    - DNF-Net outperforms on skewed features but has higher computational costs.
-
+   - rDN model, when properly tuned, achieves strong performance on highly complex features.
+   
 2. **Optimization Insights**:
    - Bayesian optimization using Tree-structured Parzen Estimator (TPE) fine-tunes hyperparameters.
-   - Scaling and quantile transformations significantly improve model stability.
-
-Key results are summarized in the [results directory](results/).
+   - Scaling and quantile transformations significantly improve model stability when features are complex and span multiple orders of magnitude.
 
 ---
 
