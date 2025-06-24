@@ -108,13 +108,13 @@ The dataset includes tabular materials data with features such as:
 
 ### BIRDSHOT Description
 The dataset includes tabular materials data with features such as:
-- **Compositional information**: Nb, Cr, V, W, Zr.
-- **Material properties**: Thermal conductivity, density, yield strength, creep rate.
+- **Compositional information**: Al	Co	Cr	Cu	Fe	Mn	Ni	V (Bayesian and EDS measured).
+- **Material properties**: Computed and experimentally evaluated mechanical properties including yield and ultimate tensile strength, hardness, depth of penetration, SFE, etc.
 
 ### BORG-HEA Description
 The dataset includes tabular materials data with features such as:
-- **Compositional information**: Nb, Cr, V, W, Zr.
-- **Material properties**: Thermal conductivity, density, yield strength, creep rate.
+- **Compositional information**: Multiple elements
+- **Material properties**: Mechanical properties
 
 ### Preprocessing
 1. Missing values are handled via interpolation.
