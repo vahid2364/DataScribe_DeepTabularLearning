@@ -16,12 +16,119 @@ from model_utils import AutoencoderModel, step_decay_schedule, StreamlitProgress
 from visualize import Visualizer
 from visualize import PlotlyVisualizer
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import plot_model
+
+# CSS styling
+st.markdown("""
+    <style>
+    /* Main app background and font */
+    .block-container {
+        background-color: #FFFBEC;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h1, h2, h3 {
+        color: #1A1A1A;
+        font-weight: 500;
+    }
+    
+    h1 {
+        font-size: 24px;  /* Change this value as desired */
+    }
+
+    /* Sidebar titles */
+    .css-1d391kg, .css-1v0mbdj {
+        color: #5B3E40;
+        font-weight: bold;
+    }
+    
+    /* Elegant button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #f44336, #e53935);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 0.55em 1.3em;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0 6px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #d32f2f, #c62828);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        transform: translateY(-2px);
+    }
+
+    /* File uploader styling */
+    .stFileUploader > label div {
+        background: linear-gradient(135deg, #F2545B, #E54457) !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        transition: 0.3s ease;
+    }
+
+    .stFileUploader > label div:hover {
+        background: linear-gradient(135deg, #D94350, #C13E48) !important;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+    }
+
+    /* Download button */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #3A86FF, #2E6FE3);
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 0.5em 1.2em;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #2F6FE4, #265CC4);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+
+    /* Center buttons inside the sidebar */
+    div[data-testid="stSidebar"] .stButton {
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+import base64
+
+file_path = "assets/app-icon.png"
+with open(file_path, "rb") as f:
+    data = f.read()
+    encoded = base64.b64encode(data).decode()
+
+st.markdown(
+    f"""
+    <div style='text-align: center;'>
+        <img src='data:image/png;base64,{encoded}' width='150'>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 os.makedirs("results", exist_ok=True)
-
 st.set_page_config(page_title="Autoencoder Trainer", layout="wide")
 
-st.title("🔍 DataScribe Encoder-Decoder Tabular Data Learning")
+st.markdown("""
+    <h1 style='font-size: 40px; text-align: center; font-weight: bold;'>
+        🔍 DataScribe Encoder-Decoder Tabular Data Learning
+    </h1>
+""", unsafe_allow_html=True)
 
 # --- Upload CSV File ---
 st.sidebar.header("Step 1: Upload Dataset")
@@ -61,7 +168,7 @@ if df is not None:
 
         st.sidebar.header("Step 4: Scaling Options")
         apply_qt = st.sidebar.checkbox("QuantileTransformer", value=True)
-        qt_method = st.sidebar.selectbox("QT Distribution", ['normal', 'uniform'])
+        qt_method = st.sidebar.selectbox("QT Distribution", ['uniform', 'normal'])
         apply_log1p = st.sidebar.checkbox("Log1p Transform", value=False)
         apply_sigmoid = st.sidebar.checkbox("Sigmoid Transform", value=False)
         apply_sc = st.sidebar.checkbox("MinMax Scaling", value=False)
@@ -150,15 +257,11 @@ if df is not None:
             
             st.sidebar.header("Step 5: Train-Test Split")
             test_size = st.sidebar.slider("Test Size (%)", min_value=5, max_value=50, value=10, step=5) / 100.0
+            random_state = st.sidebar.slider("Random State", min_value=1, max_value=255, value=42, step=1) 
             
-            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=test_size, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=test_size, random_state=random_state)
 
-            st.sidebar.header("Step 5: Autoencoder Config")
-            latent_dim = st.sidebar.slider("Latent Dim", 32, 1024, 192, step=32)
-            epochs = st.sidebar.slider("Epochs", 10, 300, 150, step=10)
-            batch_size = st.sidebar.selectbox("Batch Size", [32, 64, 96, 128], index=2)
-
-            st.sidebar.header("Step 6: Network Architecture")
+            st.sidebar.header("Step 6: Model Architecture")
             num_encoder_layers = st.sidebar.slider("Encoder Layers", 1, 5, 2)
             encoder_neurons = st.sidebar.text_input("Encoder Neurons (comma-separated)", "128,256")
             encoder_neurons = [int(n.strip()) for n in encoder_neurons.split(",") if n.strip().isdigit()]
@@ -167,24 +270,52 @@ if df is not None:
             decoder_neurons = st.sidebar.text_input("Decoder Neurons (comma-separated)", "256,128")
             decoder_neurons = [int(n.strip()) for n in decoder_neurons.split(",") if n.strip().isdigit()]
 
-            if st.button("🚀 Train Model"):
+            latent_dim = st.sidebar.slider("Latent Dim", 32, 1024, 192, step=32)
+            
+            # Model Architecture
+            model = AutoencoderModel(
+                input_dim=X_train.shape[1],
+                output_dim=y_train.shape[1],
+                latent_dim=latent_dim,
+                encoder_layers=num_encoder_layers,
+                encoder_neurons=encoder_neurons,
+                decoder_layers=num_decoder_layers,
+                decoder_neurons=decoder_neurons
+            )
+            model.build_encoder_decoder()
+            model.compile_autoencoder()
+            
+            #import io
+            #from contextlib import redirect_stdout
+            
+            ## Capture model summary
+            #string_buffer = io.StringIO()
+            #with redirect_stdout(string_buffer):
+            #    model.autoencoder.summary()
+            #summary_string = string_buffer.getvalue()
+            
+            # Display in Streamlit
+            #st.subheader("Model Architecture Summary")
+            #st.code(summary_string, language="text")
+            
+            # Save model plot
+            plot_model(model.autoencoder, to_file="results/model_architecture.png", show_shapes=True, show_layer_names=True)
+            
+            # Show in Streamlit
+            st.image("results/model_architecture.png", caption="Model Architecture", width=250)
+            
+            st.sidebar.header("Step 7: Training Config")
+            epochs = st.sidebar.slider("Epochs", 10, 300, 150, step=10)
+            batch_size = st.sidebar.selectbox("Batch Size", [32, 64, 96, 128], index=2)
+            
+            if st.sidebar.button("🚀 Train Model"):
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 
                 st.write("### Training Autoencoder...")
 
-                model = AutoencoderModel(
-                    input_dim=X_train.shape[1],
-                    output_dim=y_train.shape[1],
-                    latent_dim=latent_dim,
-                    encoder_layers=num_encoder_layers,
-                    encoder_neurons=encoder_neurons,
-                    decoder_layers=num_decoder_layers,
-                    decoder_neurons=decoder_neurons
-                )
-                model.build_encoder_decoder()
-                model.compile_autoencoder()
+
                 
                 callbacks = [
                     step_decay_schedule(),
@@ -196,7 +327,8 @@ if df is not None:
                 history = model.train(X_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=callbacks)
 
                 st.success("Model training complete.")
-                PlotlyVisualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
+                #Visualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
+                PlotlyVisualizer.plot_loss(history, log_scale=False)
 
                 #if os.path.exists("results/loss_streamlit_run.jpg"):
                 #    st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", use_container_width=True)
@@ -205,8 +337,10 @@ if df is not None:
                 _, y_test_inv = scaler.inverse_scale_data(X_test, y_test, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
                 _, y_pred_inv = scaler.inverse_scale_data(X_test, y_pred, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
 
-                PlotlyVisualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
-                PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
+                #PlotlyVisualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
+                #PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
+                PlotlyVisualizer.scatter_plot(y_test, y_pred, log_scale=False)
+                PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, log_scale=True)
 
                 st.session_state["model_trained"] = True
                 st.session_state["y_test_inv"] = y_test_inv
