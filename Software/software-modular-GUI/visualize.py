@@ -16,7 +16,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 class Visualizer:
     @staticmethod
     def plot_kde(data, columns, log_scale=False, filename='kde_plot.jpg'):
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(8, 5))
 
         if isinstance(data, pd.DataFrame):
             for col in columns:
@@ -42,7 +42,7 @@ class Visualizer:
         if log_scale:
             plt.yscale('log')
         plt.legend()
-        plt.savefig(filename)
+        plt.savefig(filename, dpi=300)
         #plt.show()
 
     @staticmethod
@@ -93,3 +93,125 @@ class Visualizer:
         plt.tight_layout()
         plt.savefig(filename)
         #plt.show()
+        
+# visualize_plotly.py
+import plotly.graph_objects as go
+import plotly.express as px
+import scipy.stats as stats
+
+class PlotlyVisualizer:
+    @staticmethod
+    def plot_kde(data, columns, log_scale=False):
+        fig = go.Figure()
+
+        if isinstance(data, pd.DataFrame):
+            for col in columns:
+                values = data[col].dropna()
+                density = stats.gaussian_kde(values)
+                x = np.linspace(np.min(values), np.max(values), 500)
+                y = density(x)
+                if log_scale:
+                    y = np.log1p(y)
+                fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name=str(col)))
+        elif isinstance(data, (np.ndarray, list)):
+            data = np.array(data)
+            for i, col in enumerate(columns):
+                values = data[:, i]
+                density = stats.gaussian_kde(values)
+                x = np.linspace(np.min(values), np.max(values), 500)
+                y = density(x)
+                if log_scale:
+                    y = np.log1p(y)
+                fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name=f"Column {col}"))
+        else:
+            raise TypeError("Input data must be a Pandas DataFrame, NumPy array, or list.")
+
+        fig.update_layout(
+            title="Kernel Density Estimate (KDE)",
+            xaxis_title="Value",
+            yaxis_title="Density (log scale)" if log_scale else "Density",
+            template="plotly_white"
+        )
+        return fig
+
+    @staticmethod
+    def plot_kde_px(data, column, log_scale=False):
+        fig = px.histogram(data, x=column, nbins=200, marginal="rug", histnorm='density')
+        fig.update_traces(opacity=0.6)
+        fig.update_layout(
+            title=f"KDE for {column}",
+            yaxis_title="Density",
+            xaxis_title=column
+        )
+        return fig
+
+    @staticmethod
+    def plot_loss(history, log_scale=False):
+        loss = history.history['loss']
+        val_loss = history.history.get('val_loss', [])
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(y=loss, mode='lines', name='Training Loss'))
+        if val_loss:
+            fig.add_trace(go.Scatter(y=val_loss, mode='lines', name='Validation Loss'))
+
+        fig.update_layout(
+            title="Training and Validation Loss",
+            xaxis_title="Epoch",
+            yaxis_title="Loss (log)" if log_scale else "Loss",
+            yaxis_type="log" if log_scale else "linear",
+            template="plotly_white"
+        )
+        return fig
+
+    @staticmethod
+    def scatter_plot(y_true, y_pred, idx=0, log_scale=False):
+        y_true = np.array(y_true)
+        y_pred = np.array(y_pred)
+
+        if log_scale:
+            epsilon = 1e-12
+            y_true_vals = np.log1p(np.maximum(y_true[:, idx], epsilon))
+            y_pred_vals = np.log1p(np.maximum(y_pred[:, idx], epsilon))
+        else:
+            y_true_vals = y_true[:, idx]
+            y_pred_vals = y_pred[:, idx]
+
+        mse = mean_squared_error(y_true_vals, y_pred_vals)
+        r2 = r2_score(y_true_vals, y_pred_vals)
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=y_true_vals,
+            y=y_pred_vals,
+            mode='markers',
+            name='Predictions',
+            marker=dict(size=5, color='blue', opacity=0.5)
+        ))
+
+        min_val = min(np.min(y_true_vals), np.min(y_pred_vals))
+        max_val = max(np.max(y_true_vals), np.max(y_pred_vals))
+
+        fig.add_trace(go.Scatter(
+            x=[min_val, max_val],
+            y=[min_val, max_val],
+            mode='lines',
+            name='Perfect Fit',
+            line=dict(color='black', dash='dash')
+        ))
+
+        fig.update_layout(
+            title="Predicted vs. Actual Scatter Plot",
+            xaxis_title="Actual" + (" (log1p)" if log_scale else ""),
+            yaxis_title="Predicted" + (" (log1p)" if log_scale else ""),
+            annotations=[
+                dict(x=0.05, y=0.95, xref='paper', yref='paper',
+                     text=f"MSE: {mse:.3g}<br>R²: {r2:.3f}",
+                     showarrow=False, align='left',
+                     font=dict(size=12))
+            ],
+            template="plotly_white"
+        )
+
+        return fig

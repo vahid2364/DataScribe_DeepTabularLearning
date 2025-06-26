@@ -13,6 +13,7 @@ from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping, ModelCheckpoint
 from FullyDense_Model import create_complex_encoder, create_complex_decoder
+from tensorflow.keras.callbacks import Callback
 
 class AutoencoderModel:
     def __init__(self, input_dim, output_dim, latent_dim=192,
@@ -82,6 +83,19 @@ class AutoencoderModel:
                 mode='min'
             )
         ]
+    
+
+class StreamlitProgressCallback(Callback):
+    def __init__(self, epochs, progress_bar, status_text):
+        super().__init__()
+        self.epochs = epochs
+        self.progress_bar = progress_bar
+        self.status_text = status_text
+
+    def on_epoch_end(self, epoch, logs=None):
+        progress = int((epoch + 1) / self.epochs * 100)
+        self.progress_bar.progress(progress)
+        self.status_text.text(f"Epoch {epoch + 1}/{self.epochs} - Loss: {logs.get('loss'):.4f}")
 
 def step_decay_schedule(initial_lr=1.26e-4, decay_factor=0.98, step_size=30):
     def schedule(epoch, lr):

@@ -12,15 +12,16 @@ import numpy as np
 import os
 
 from scaling_utils import Scaling
-from model_utils import AutoencoderModel, step_decay_schedule
+from model_utils import AutoencoderModel, step_decay_schedule, StreamlitProgressCallback
 from visualize import Visualizer
+from visualize import PlotlyVisualizer
 from sklearn.model_selection import train_test_split
 
 os.makedirs("results", exist_ok=True)
 
 st.set_page_config(page_title="Autoencoder Trainer", layout="wide")
 
-st.title("🔍 Deep Autoencoder for Tabular Data")
+st.title("🔍 DataScribe Encoder-Decoder Tabular Data Learning")
 
 # --- Upload CSV File ---
 st.sidebar.header("Step 1: Upload Dataset")
@@ -89,10 +90,10 @@ if df is not None:
         
             Visualizer.plot_kde(df, output_columns, log_scale=True, filename=kde_orig_path)
             Visualizer.plot_kde(y_scaled, output_columns, log_scale=False, filename=kde_scaled_path)
-        
+
             st.session_state["kde_orig_path"] = kde_orig_path
             st.session_state["kde_scaled_path"] = kde_scaled_path
-            
+        
         if "kde_orig_path" in st.session_state and "kde_scaled_path" in st.session_state:
             col1, col2 = st.columns(2)
         
@@ -100,14 +101,57 @@ if df is not None:
                 st.image(st.session_state["kde_orig_path"], caption="Original KDE", use_container_width=True)
         
             with col2:
-                st.image(st.session_state["kde_scaled_path"], caption="Scaled KDE", use_container_width=True)                    
+                st.image(st.session_state["kde_scaled_path"], caption="Scaled KDE", use_container_width=True) 
+        
+        #     fig_kde_orig = PlotlyVisualizer.plot_kde(df, output_columns, log_scale=True)
+        #     fig_kde_scaled = PlotlyVisualizer.plot_kde(y_scaled, output_columns, log_scale=False)
+                        
+        #     # Generate KDE figures using Plotly
+        #     st.session_state["fig_kde_orig"] = PlotlyVisualizer.plot_kde(df, output_columns, log_scale=True)
+        #     st.session_state["fig_kde_scaled"] = PlotlyVisualizer.plot_kde(y_scaled, output_columns, log_scale=False)
+                    
+        # # --- Display the Plotly KDE plots ---
+        # if "fig_kde_orig" in st.session_state and "fig_kde_scaled" in st.session_state:
+        #     col1, col2 = st.columns(2)
+        
+        #     with col1:
+        #         st.plotly_chart(st.session_state["fig_kde_orig"], use_container_width=True)
+        
+        #     with col2:
+        #         st.plotly_chart(st.session_state["fig_kde_scaled"], use_container_width=True)
+                
+                
+        #     # Only one output column at a time is supported in plot_kde_px
+        #     output_col = output_columns[0] if output_columns else None
+            
+        #     if output_col:
+        #         # Generate KDE figures using Plotly Express
+        #         fig_kde_orig = PlotlyVisualizer.plot_kde_px(df, output_col, log_scale=True)
+        #         fig_kde_scaled = PlotlyVisualizer.plot_kde_px(pd.DataFrame(y_scaled, columns=output_columns), output_col, log_scale=False)
+            
+        #         # Store in session
+        #         st.session_state["fig_kde_orig"] = fig_kde_orig
+        #         st.session_state["fig_kde_scaled"] = fig_kde_scaled
+            
+        #     # --- Display the Plotly KDE plots ---
+        # if "fig_kde_orig" in st.session_state and "fig_kde_scaled" in st.session_state:
+        #     col1, col2 = st.columns(2)
+        
+        #     with col1:
+        #         st.plotly_chart(st.session_state["fig_kde_orig"], use_container_width=True)
+        
+        #     with col2:
+        #         st.plotly_chart(st.session_state["fig_kde_scaled"], use_container_width=True)
 
         if st.session_state.get("scaling_applied", False):
             X_scaled = st.session_state["X_scaled"]
             y_scaled = st.session_state["y_scaled"]
             scaler = st.session_state["scaler"]
-
-            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=0.1, random_state=42)
+            
+            st.sidebar.header("Step 5: Train-Test Split")
+            test_size = st.sidebar.slider("Test Size (%)", min_value=5, max_value=50, value=10, step=5) / 100.0
+            
+            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=test_size, random_state=42)
 
             st.sidebar.header("Step 5: Autoencoder Config")
             latent_dim = st.sidebar.slider("Latent Dim", 32, 1024, 192, step=32)
@@ -124,6 +168,10 @@ if df is not None:
             decoder_neurons = [int(n.strip()) for n in decoder_neurons.split(",") if n.strip().isdigit()]
 
             if st.button("🚀 Train Model"):
+                
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
                 st.write("### Training Autoencoder...")
 
                 model = AutoencoderModel(
@@ -137,12 +185,18 @@ if df is not None:
                 )
                 model.build_encoder_decoder()
                 model.compile_autoencoder()
+                
+                callbacks = [
+                    step_decay_schedule(),
+                    StreamlitProgressCallback(epochs, progress_bar, status_text),
+                    *model.default_callbacks("streamlit_run")
+                ]
 
-                callbacks = [step_decay_schedule()] + model.default_callbacks("streamlit_run")
+                #callbacks = [step_decay_schedule()] + model.default_callbacks("streamlit_run")
                 history = model.train(X_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=callbacks)
 
                 st.success("Model training complete.")
-                Visualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
+                PlotlyVisualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
 
                 #if os.path.exists("results/loss_streamlit_run.jpg"):
                 #    st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", use_container_width=True)
@@ -151,8 +205,8 @@ if df is not None:
                 _, y_test_inv = scaler.inverse_scale_data(X_test, y_test, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
                 _, y_pred_inv = scaler.inverse_scale_data(X_test, y_pred, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
 
-                Visualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
-                Visualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
+                PlotlyVisualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
+                PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
 
                 st.session_state["model_trained"] = True
                 st.session_state["y_test_inv"] = y_test_inv
