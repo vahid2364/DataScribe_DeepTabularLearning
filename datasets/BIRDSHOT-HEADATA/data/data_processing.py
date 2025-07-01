@@ -160,29 +160,9 @@ latex_table = df_cleaned_filled.to_latex(index=False, float_format="%.1f", colum
 
 # %%
 
+import pandas as pd
+import numpy as np
 from scipy.stats import skew, kurtosis
-
-def calculate_feature_complexity(df):
-    """
-    Calculates feature complexity for each column in the dataframe.
-    Feature complexity = |skewness| + |kurtosis - 3|
-    Returns a DataFrame sorted by complexity.
-    """
-    complexity = {}
-    for col in df.columns:
-        if pd.api.types.is_numeric_dtype(df[col]):
-            sk = skew(df[col].dropna())
-            kurt = kurtosis(df[col].dropna(), fisher=False)  # Pearson definition
-            complexity[col] = abs(sk) + abs(kurt - 3)
-
-    return pd.DataFrame.from_dict(complexity, orient='index', columns=['Feature Complexity'])
-
-# Example usage:
-feature_complexity_df = calculate_feature_complexity(df_cleaned_filled)
-print(feature_complexity_df)
-
-pause
-# %% Latex Table for paper
 
 # Select only the required columns
 selected_columns = [
@@ -196,26 +176,30 @@ selected_columns = [
     'Depth of Penetration (mm) FE_Sim'                   
 ]
 
-# Calculate extended statistical summary with skewness and kurtosis
-summary_df = df_cleaned_filled[selected_columns].agg(['mean', 'std', 'min', 'max', 'median', 'skew', 'kurtosis']).T
+# Calculate extended summary + feature complexity using consistent kurtosis (Pearson)
+summary_data = []
+for col in selected_columns:
+    data = df_cleaned_filled[col].dropna()
+    mean = data.mean()
+    std = data.std()
+    min_val = data.min()
+    max_val = data.max()
+    median = data.median()
+    q25 = data.quantile(0.25)
+    q75 = data.quantile(0.75)
+    sk = skew(data)
+    kurt = kurtosis(data, fisher=False)  # Pearson
+    complexity = abs(sk) + abs(kurt - 3)
+    
+    summary_data.append([mean, std, min_val, max_val, median, q25, q75, sk, kurt, complexity])
 
-# Evaluate feature complexity:
-feature_complexity_df = calculate_feature_complexity(df_cleaned_filled[selected_columns])
-print(feature_complexity_df)
+# Build DataFrame
+summary_df = pd.DataFrame(summary_data, 
+    index=selected_columns, 
+    columns=['Mean', 'Std. Dev.', 'Min', 'Max', 'Median', '25%', '75%', 'Skewness', 'Kurtosis', 'Feature Complexity']
+)
 
-# Optionally, include 25%, 50%, and 75% percentiles
-percentiles = df_cleaned_filled[selected_columns].describe(percentiles=[0.25, 0.5, 0.75]).T
-summary_df['25%'] = percentiles['25%']
-summary_df['75%'] = percentiles['75%']
-
-# Ensure same index alignment
-summary_df = pd.concat([summary_df, feature_complexity_df], axis=1)
-# Move 'Feature Complexity' column to the end
-feature_col = summary_df.pop('Feature Complexity')
-summary_df['Feature Complexity'] = feature_col
-
-
-# Generate LaTeX table with skewness and kurtosis, using .2g format
+# %% Generate LaTeX table
 latex_table = r"""
 \begin{table*}[!h]
     \centering
@@ -228,18 +212,20 @@ latex_table = r"""
         \midrule
 """
 
-# Populate the LaTeX table with the extended statistical summary using .2g format
 for feature in summary_df.index:
-    latex_table += f"        {feature} & {summary_df.loc[feature, 'mean']:.2g} & {summary_df.loc[feature, 'std']:.2g} & {summary_df.loc[feature, 'min']:.2g} & {summary_df.loc[feature, 'max']:.2g} & {summary_df.loc[feature, 'median']:.2g} & {summary_df.loc[feature, '25%']:.2g} & {summary_df.loc[feature, '75%']:.2g} & {summary_df.loc[feature, 'skew']:.2f} & {summary_df.loc[feature, 'kurtosis']:.2f} & {summary_df.loc[feature, 'Feature Complexity']:.1f}  \\\\\n"
+    row = summary_df.loc[feature]
+    latex_table += (f"        {feature} & "
+        f"{row['Mean']:.2f} & {row['Std. Dev.']:.2f} & {row['Min']:.2f} & {row['Max']:.2f} & "
+        f"{row['Median']:.2f} & {row['25%']:.2f} & {row['75%']:.2f} & "
+        f"{row['Skewness']:.3f} & {row['Kurtosis']:.3f} & {row['Feature Complexity']:.2f} \\\\\n"
+    )
 
-# End of the table
 latex_table += r"""
         \bottomrule
     \end{tabular}
 \end{table*}
 """
 
-# Print LaTeX table
 print(latex_table)
 
 

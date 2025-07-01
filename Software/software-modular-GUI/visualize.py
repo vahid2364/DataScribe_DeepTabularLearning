@@ -16,7 +16,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 class Visualizer:
     @staticmethod
     def plot_kde(data, columns, log_scale=False, filename='kde_plot.jpg'):
-        plt.figure(figsize=(8, 5))
+        plt.figure(figsize=(7, 4))
 
         if isinstance(data, pd.DataFrame):
             for col in columns:
@@ -25,23 +25,27 @@ class Visualizer:
         elif isinstance(data, (np.ndarray, list)):
             data = np.array(data)
             for i, col in enumerate(columns):
-                sns.kdeplot(data[:, i], label=f"Column {col}", fill=True, log_scale=log_scale)
+                sns.kdeplot(data[:, i], label=f"Scaled: {col}", fill=True, log_scale=log_scale)
 
         else:
             raise TypeError("Input data must be a Pandas DataFrame, NumPy array, or list.")
 
         plt.legend()
+        plt.xlabel('')
+        plt.tight_layout()
         plt.savefig(filename)
         #plt.show()
 
     @staticmethod
     def plot_loss(history, filename='loss_plot.jpg', log_scale=False):
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=(7, 7))
         plt.plot(history.history['loss'], label='Training Loss')
         plt.plot(history.history['val_loss'], label='Validation Loss')
+        plt.xlabel('epoch')
         if log_scale:
             plt.yscale('log')
         plt.legend()
+        plt.tight_layout()
         plt.savefig(filename, dpi=300)
         #plt.show()
 
@@ -91,7 +95,7 @@ class Visualizer:
         plt.text(0.05, 0.90, f'R$^2$: {r2:.3f}', transform=plt.gca().transAxes, fontsize=15, verticalalignment='top')
 
         plt.tight_layout()
-        plt.savefig(filename)
+        plt.savefig(filename, dpi=300)
         #plt.show()
         
 # visualize_plotly.py

@@ -23,7 +23,7 @@ st.markdown("""
     <style>
     /* Main app background and font */
     .block-container {
-        background-color: #FFFBEC;
+        #background-color: #FFFBEC;
         font-family: 'Segoe UI', sans-serif;
     }
 
@@ -194,7 +194,9 @@ if df is not None:
         
             kde_orig_path = "results/kde_original.jpg"
             kde_scaled_path = "results/kde_scaled.jpg"
-        
+            
+            st.write("### Target Data Kernel Desnsity Estimates...")
+                
             Visualizer.plot_kde(df, output_columns, log_scale=True, filename=kde_orig_path)
             Visualizer.plot_kde(y_scaled, output_columns, log_scale=False, filename=kde_scaled_path)
 
@@ -302,7 +304,7 @@ if df is not None:
             plot_model(model.autoencoder, to_file="results/model_architecture.png", show_shapes=True, show_layer_names=True)
             
             # Show in Streamlit
-            st.image("results/model_architecture.png", caption="Model Architecture", width=250)
+            st.image("results/model_architecture.png", caption="Model Architecture", width=350)
             
             st.sidebar.header("Step 7: Training Config")
             epochs = st.sidebar.slider("Epochs", 10, 300, 150, step=10)
@@ -349,7 +351,7 @@ if df is not None:
 # --- Persisted Outputs ---
 if st.session_state.get("model_trained", False):
     if os.path.exists("results/loss_streamlit_run.jpg"):
-        st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", use_container_width=True)
+        st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", width=900)
 
 
     col1, col2 = st.columns(2)

@@ -1,3 +1,20 @@
+<div align="center">
+   
+   # DataScribe Encoder-Decoder Model
+   
+   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/license/gpl-3-0)
+   ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+   ![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey)
+   
+   <p>
+      <a href="https://github.com/vahid2364/DataScribe_DeepTabularLearning/issues/new">Report a Bug</a> |
+      <a href="https://github.com/vahid2364/DataScribe_DeepTabularLearning/issues/new?labels=enhancement">Request a Feature</a>
+   </p>
+   
+</div>
+
+---
+
 # DataScribe Deep Tabular Learning
 
 This repository provides the code, data, and documentation for the paper:

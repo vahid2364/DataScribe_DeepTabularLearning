@@ -290,10 +290,17 @@ objective_data = []
 max_trials = 0
 
 # First, find the maximum number of trials across all studies
+# for study_info in study_infos:
+#     storage = RDBStorage(url=study_info["url"])
+#     study = optuna.load_study(study_name=study_info["name"], storage=storage)
+#     values = collect_objective_values(study)
+#     objective_data.append(values)
+#     max_trials = max(max_trials, len(values))
+
 for study_info in study_infos:
     storage = RDBStorage(url=study_info["url"])
     study = optuna.load_study(study_name=study_info["name"], storage=storage)
-    values = collect_objective_values(study)
+    _, values = collect_objective_values(study, sort_values=True)  # or False as needed
     objective_data.append(values)
     max_trials = max(max_trials, len(values))
 
@@ -339,51 +346,83 @@ plt.show()
 # %%
 
 import matplotlib.pyplot as plt
-import optuna.visualization.matplotlib as optuna_matplotlib
+from optuna.storages import RDBStorage
+from optuna.importance import get_param_importances
+import re
 
 for study_info in study_infos:
+    
+    print(study_info)
+    
     storage = RDBStorage(url=study_info["url"])
     study = optuna.load_study(study_name=study_info["name"], storage=storage)
-    
-    # Check if the study has completed trials
+
     completed_trials = [trial for trial in study.trials if trial.state == optuna.trial.TrialState.COMPLETE]
-    
     if len(completed_trials) == 0:
-        print(f"No completed trials for {study_info['name']}, skipping parallel coordinate plot.")
+        print(f"No completed trials for {study_info['name']}, skipping plot.")
         continue
+
+    # Get importances
+    importances = get_param_importances(study)
+    print(importances)
     
-    # Plot parallel coordinate plot for the current study
-    #fig = vis.plot_parallel_coordinate(study)
-    # First, create the figure with your desired size
+    # Sort by importance descending
+    params = list(importances.keys())
+    values = list(importances.values())
+    sorted_pairs = sorted(zip(values, params), reverse=True)
+    sorted_values, sorted_params = zip(*sorted_pairs)
+        
+    # Make labels nicer: replace underscores with spaces, capitalize
+    nice_labels = [p.replace('_', ' ').capitalize() for p in sorted_params]
+        
     
-    # Plot the hyperparameter importance using the ax object
-    fig = optuna_matplotlib.plot_param_importances(study)
+    short_labels = []
+    for p in sorted_params:
+        p_lower = p.lower()
+        p_clean = p_lower.replace('encoder', 'ENC').replace('decoder', 'DEC').replace('layer', 'L').replace('strength_feature_penalty (gamma)', 'feature reusage').replace('dec', 'DEC').replace('sparsity reg (lambda_sparse)', 'sparsity loss coeff.')
+        p_clean = p_clean.replace('_', ' ')
+        p_clean = re.sub(r'(\s+)',' ', p_clean).strip()  # remove extra spaces
+        short_labels.append(p_clean)
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(6, 3))
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
     
-    fig.figure.set_size_inches(6, 3)  # Set width and height
-    fig.set_title('')  # Removes the title
-    fig.figure.patch.set_facecolor('white')  # Set figure background to white
-    fig.patch.set_facecolor('white')  # Set axes background to white
-    # Make lines, ticks, and labels black
-    fig.tick_params(colors='black')  # Ticks
-    fig.xaxis.label.set_color('black')  # X-axis label
-    fig.yaxis.label.set_color('black')  # Y-axis label
-    fig.title.set_color('white')  # Title/ does not work
+    bars = ax.barh(short_labels, sorted_values, color='steelblue')
+    ax.set_xlabel('Importance', color='black')
+    #ax.set_ylabel('Hyperparameter', color='black')
+    ax.tick_params(colors='black')
+    ax.xaxis.label.set_color('black')
+    ax.yaxis.label.set_color('black')
+    ax.set_xlim([0,1])
     
-    # Set all spines (the lines around the plot) to black
-    for spine in fig.spines.values():
+    for spine in ax.spines.values():
         spine.set_edgecolor('black')
     
-    # Change color of all text elements to black
-    for label in fig.get_xticklabels() + fig.get_yticklabels():
+    # Make tick labels black & bold
+    for label in ax.get_yticklabels():
         label.set_color('black')
+        label.set_fontweight('bold')
     
-    fig.legend(loc='lower right')
+    # Add importance values next to bars
+    for bar, value in zip(bars, sorted_values):
+        ax.text(
+            bar.get_width() + 0.01,   # x position, slightly to the right of bar
+            bar.get_y() + bar.get_height()/2,  # center vertically
+            f"{value:.2f}",            # formatted value
+            va='center', 
+            ha='left', 
+            color='black',
+            fontweight='bold',
+            fontsize=9
+        )
     
+    ax.invert_yaxis()  # highest importance on top
     plt.tight_layout()
-    # Save the figure for each study (optional)
     plt.savefig(f"hyperparam-importance_{study_info['name']}.png", dpi=300)
     plt.show()
-
+    
 # %%
 
 # Loop through each study to extract best hyperparameters
