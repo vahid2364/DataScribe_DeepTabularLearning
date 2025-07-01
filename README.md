@@ -4,18 +4,15 @@
    
    [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
    ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+   ![Optuna](https://img.shields.io/badge/Optuna-4.0-brightgreen)
+   ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.18.0-orange?logo=tensorflow)
    ![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey)
    
    <p>
       <a href="https://github.com/vahid2364/DataScribe_DeepTabularLearning/issues/new">Report a Bug</a> |
       <a href="https://github.com/vahid2364/DataScribe_DeepTabularLearning/issues/new?labels=enhancement">Request a Feature</a>
    </p>
-   
-   ## 🚀 Environment
-   ![Python](https://img.shields.io/badge/Python-3.11.9-blue?logo=python)
-   ![Optuna](https://img.shields.io/badge/Optuna-4.0-brightgreen)
-   ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.18.0-orange?logo=tensorflow)
-   
+      
 </div>
 
 ---
