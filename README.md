@@ -143,7 +143,7 @@ The dataset includes tabular materials data with features such as:
 
 ---
 
-## 🚀 Models
+## Models
 
 The repository implements and benchmarks the following models:
 - **Encoder-Decoder (asymmetric overcomplete) regularized Dense Neural Network (rDN)**: Standard regularized dense architecture.
@@ -158,6 +158,15 @@ The repository implements and benchmarks the following models:
 - **Mean Squared Logarithmic Error (MSLE)**
 - **R-squared (R²)**
 - **Symmetric Mean Absolute Percentage Error (SMAPE)**
+
+---
+
+## Workflow
+
+-	**Workflow 1**:
+Select your dataset → choose a model → perform hyperparameter optimization → run predictions using the best-found parameters.
+-	**Workflow 2**:
+Use the provided graphical interface to train models on any dataset with custom hyperparameters — a hands-on sandbox ideal for students and practitioners to explore model behavior.
 
 ---
 
