@@ -181,13 +181,15 @@ print(f"Total number of NaN values in the DataFrame: {total_nan}")
 
 # %%
 
-# Plot KDE using Seaborn (integrated with Matplotlib)
+os.makedirs('KDEs', exist_ok=True)
+
+
 plt.figure(figsize=(8, 5))
 
 for idx in ['$/kg',    'phi_deltaT',    'TSC'                   ]:
     sns.kdeplot(df_cleaned_filled[idx], fill=True, color='blue', label='KDE')
     safe_idx = idx.replace('$','').replace('/','_').replace(' ','_')
-    plt.savefig('kde_plot_'+str(safe_idx)+'.jpg', dpi=300)
+    plt.savefig('KDEs/kde_plot_'+str(safe_idx)+'.jpg', dpi=300)
     plt.show() 
 
 # %%
