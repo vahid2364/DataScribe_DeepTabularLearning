@@ -163,10 +163,20 @@ The repository implements and benchmarks the following models:
 
 ## Workflow
 
--	**Workflow 1**:
-Select your dataset → choose a model → perform hyperparameter optimization → run predictions using the best-found parameters.
--	**Workflow 2**:
-Use the provided graphical interface to train models on any dataset with custom hyperparameters — a hands-on sandbox ideal for students and practitioners to explore model behavior.
+⚙️ **Workflow 1**
+
+1. Select dataset
+2. Choose model
+3. Perform hyperparameter optimization
+4. Run predictions using the best-found parameters
+
+⸻
+
+🖥️ **Workflow 2**
+
+🎛️ Use the provided graphical interface to train models on any dataset with custom hyperparameters.
+🧑‍💻 This serves as a hands-on sandbox for students and practitioners to explore and understand different aspects of machine learning models.
+
 
 ---
 
