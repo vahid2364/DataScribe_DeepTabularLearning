@@ -63,7 +63,7 @@ def create_fdn_model(trial):
     """
     lamb = trial.suggest_float('lambda', 1e-6, 1e-3, log=True)
     rate = trial.suggest_float('drop_out_rate', 0.1, 0.4, step=0.1)
-    alp = trial.suggest_float('alpha', 0.01, 0.2, log=True)
+    alp = trial.suggest_float('alpha', 0.001, 0.2, log=True)
     learning_rate = trial.suggest_float('learning_rate', 1e-5, 1e-2, log=True)
     optimizer_name = trial.suggest_categorical('optimizer', ['adam', 'sgd', 'adadelta'])
     
@@ -78,7 +78,7 @@ def create_fdn_model(trial):
     fln = trial.suggest_int(
         'encoder_neurons_layer_1', 
         4,      # Minimum neurons in the first layer - overcomplete
-        256,    # Maximum constrained by latent_dim - overcomplete
+        64,    # Maximum constrained by latent_dim - overcomplete
         #256,   # Minimum neurons in the first layer - undercomplete
         #1024,  # Maximum constrained by latent_dim - undercomplete
         step=4
@@ -126,7 +126,7 @@ def create_fdn_model(trial):
     # Debugging prints (optional)
     #print('latent_dim', latent_dim)
     
-    if neurons_per_layer_encoder[-1] + 32 > 512:
+    if neurons_per_layer_encoder[-1] + 16 > 256:
         print("Warning: `latent_dim` range is limited.")
 
     # Save the layer configurations as trial attributes for analysis later
@@ -163,9 +163,9 @@ def create_fdn_model(trial):
     
     FD_EncoderDecoder.compile(optimizer=optimizer, loss='mse')
     
-    #encoder.summary()
-    #decoder.summary()      
-    FD_EncoderDecoder.summary()
+    encoder.summary()
+    decoder.summary()      
+    #FD_EncoderDecoder.summary()
     #pause
     
     return FD_EncoderDecoder
@@ -187,8 +187,8 @@ def run_optimization(study_name, num_trials, X_train, X_test, y_train, y_test):
         # Create the model
         model = create_fdn_model(trial)
     
-        batch_size = trial.suggest_int('batch_size', 32, 128, step=8)
-        epochs = trial.suggest_int('epochs', 60, 200, step=20)
+        batch_size = trial.suggest_int('batch_size', 8, 64, step=8)
+        epochs = 100 # trial.suggest_int('epochs', 100, step=20)
     
         # Define callbacks
         early_stopping = EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
@@ -308,12 +308,12 @@ def load_and_split_data():
         input_columns, 
         output_columns, 
         threshold=1e-9, 
-        apply_sc=True, scaling_method='minmax', 
-        apply_qt=True, qt_method='uniform', 
+        apply_sc=False, scaling_method='minmax', 
+        apply_qt=False, qt_method='uniform', 
         apply_log1p=False, 
         apply_sqrt=False, 
         test_size=0.15, 
-        random_state=42
+        random_state=41
     )
     return X_train, X_test, y_train, y_test
 
@@ -362,7 +362,7 @@ if __name__ == "__main__":
         )
     
     # Split the number of trials across multiple processes
-    total_trials  = 6*3
+    total_trials  = 6*6
     num_processes = 6
     num_trials_per_process = total_trials // num_processes  # Adjust this based on desired total trials
 
@@ -660,6 +660,7 @@ if __name__ == "__main__":
 
         plt.legend(fontsize=25)
         plt.grid(True)
+        plt.yscale('log')
         plt.tight_layout()
         plt.savefig('loss.jpg', dpi=300, transparent=True)
         plt.show()

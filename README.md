@@ -11,6 +11,11 @@
       <a href="https://github.com/vahid2364/DataScribe_DeepTabularLearning/issues/new?labels=enhancement">Request a Feature</a>
    </p>
    
+   ## 🚀 Environment
+   ![Python](https://img.shields.io/badge/Python-3.11.9-blue?logo=python)
+   ![Optuna](https://img.shields.io/badge/Optuna-4.0-brightgreen)
+   ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.18.0-orange?logo=tensorflow)
+   
 </div>
 
 ---

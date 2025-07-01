@@ -67,6 +67,8 @@ for idx in numerical_data.columns:
     
 # %% Latex Table for paper
 
+from scipy.stats import skew, kurtosis
+
 # Select only the required columns
 selected_columns = [
 'Al', 'Co', 'Fe', 'Ni', 'Si', 'Cr', 'Mn', 'Nb', 'Mo', 'Ti', 'Cu', 'C',
@@ -90,41 +92,61 @@ selected_columns = [
        'PROPERTY: C content (wppm)',
 ]
 
-# Calculate extended statistical summary with skewness and kurtosis
-summary_df = merged_df[selected_columns].agg(['mean', 'std', 'min', 'max', 'median', 'skew', 'kurtosis']).T
 
-# Optionally, include 25%, 50%, and 75% percentiles
-percentiles = merged_df[selected_columns].describe(percentiles=[0.25, 0.5, 0.75]).T
-summary_df['25%'] = percentiles['25%']
-summary_df['75%'] = percentiles['75%']
+# Calculate extended summary + feature complexity using consistent kurtosis (Pearson)
+summary_data = []
+for col in selected_columns:
+    data = merged_df[col].dropna()
+    mean = data.mean()
+    std = data.std()
+    min_val = data.min()
+    max_val = data.max()
+    median = data.median()
+    q25 = data.quantile(0.25)
+    q75 = data.quantile(0.75)
+    sk = skew(data)
+    kurt = kurtosis(data, fisher=False)  # Pearson
+    complexity = abs(sk) + abs(kurt - 3)
+    
+    summary_data.append([mean, std, min_val, max_val, sk, kurt, complexity])
 
-# Generate LaTeX table with skewness and kurtosis, using .2g format
+# Build DataFrame
+summary_df = pd.DataFrame(summary_data, 
+    index=selected_columns, 
+    columns=['Mean', 'Std. Dev.', 'Min', 'Max', 'Skewness', 'Kurtosis', 'Feature Complexity']
+)
+
+
+# %% Generate LaTeX table
+
 latex_table = r"""
 \begin{table*}[!h]
     \centering
-    \caption{MPEA dataset: Extended Statistical Summary of the Dataset including Skewness and Kurtosis}
+    \caption{Extended Statistical Summary of the Dataset including Skewness and Kurtosis}
     \scriptsize
     \label{tab:extended_data_stats_skew_kurt}
-    \vspace{-3mm}
-    \begin{tabular}{lccccccccc}
+    \begin{tabular}{lcccccccccc}
         \toprule
-        \textbf{Feature} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Max} & \textbf{Median} & \textbf{25\%} & \textbf{75\%} & \textbf{Skewness} & \textbf{Kurtosis} \\
+        \textbf{Feature} & \textbf{Mean} & \textbf{Std. Dev.} & \textbf{Min} & \textbf{Max} & \textbf{Skewness} & \textbf{Kurtosis} & \textbf{Feature Complexity}  \\
         \midrule
 """
 
-# Populate the LaTeX table with the extended statistical summary using .2g format
 for feature in summary_df.index:
-    latex_table += f"        {feature} & {summary_df.loc[feature, 'mean']:.1f} & {summary_df.loc[feature, 'std']:.1f} & {summary_df.loc[feature, 'min']:.1f} & {summary_df.loc[feature, 'max']:.1f} & {summary_df.loc[feature, 'median']:.1f} & {summary_df.loc[feature, '25%']:.1f} & {summary_df.loc[feature, '75%']:.1f} & {summary_df.loc[feature, 'skew']:.1f} & {summary_df.loc[feature, 'kurtosis']:.1f} \\\\\n"
-    #latex_table += f"        {feature} & {summary_df.loc[feature, 'mean']:.2f} & {summary_df.loc[feature, 'std']:.2f} & {summary_df.loc[feature, 'min']:.2f} & {summary_df.loc[feature, 'max']:.2f} & {summary_df.loc[feature, 'median']:.2f} & {summary_df.loc[feature, '25%']:.2f} & {summary_df.loc[feature, '75%']:.2f} & {summary_df.loc[feature, 'skew']:.2f} & {summary_df.loc[feature, 'kurtosis']:.2f} \\\\\n"
-# End of the table
+    row = summary_df.loc[feature]
+    latex_table += (f"        {feature} & "
+        f"{row['Mean']:.2f} & {row['Std. Dev.']:.2f} & {row['Min']:.2f} & {row['Max']:.2f} & "
+        f"{row['Skewness']:.3f} & {row['Kurtosis']:.3f} & {row['Feature Complexity']:.2f} \\\\\n"
+    )
+
 latex_table += r"""
         \bottomrule
     \end{tabular}
 \end{table*}
 """
 
-# Print LaTeX table
 print(latex_table)
+
+pause
 
 # %%
 

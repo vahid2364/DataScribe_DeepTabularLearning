@@ -39,7 +39,7 @@ os.environ['PYTHONHASHSEED'] = str(SEED)
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def process_and_split_data(df, input_columns, output_columns, threshold=1e-9,
-                           apply_sc=True, scaling_method='minmax', 
+                           apply_sc=False, scaling_method='minmax', 
                            apply_pt=False, pt_method='yeo-johnson', 
                            apply_qt=False, qt_method='normal', 
                            apply_log1p=False, apply_sigmoid=False, 

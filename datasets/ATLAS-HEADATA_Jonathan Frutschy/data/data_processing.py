@@ -192,6 +192,8 @@ for idx in ['$/kg',    'phi_deltaT',    'TSC'                   ]:
     plt.savefig('KDEs/kde_plot_'+str(safe_idx)+'.jpg', dpi=300)
     plt.show() 
 
+pause
+
 # %%
 
 # Save the DataFrame to a CSV file
