@@ -174,8 +174,8 @@ The repository implements and benchmarks the following models:
 
 🖥️ **Workflow 2**
 
-🎛️ Use the provided graphical interface to train models on any dataset with custom hyperparameters.
-🧑‍💻 This serves as a hands-on sandbox for students and practitioners to explore and understand different aspects of machine learning models.
+- 🎛️ Use the provided graphical interface to train models on any dataset with custom hyperparameters.
+- 🧑‍💻 This serves as a hands-on sandbox for students and practitioners to explore and understand different aspects of machine learning models.
 
 
 ---
