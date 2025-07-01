@@ -1,8 +1,8 @@
 <div align="center">
    
-   # DataScribe Encoder-Decoder Model
+   # DataScribe Tabular Learning Models
    
-   [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/license/gpl-3-0)
+   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
    ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
    ![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey)
    
