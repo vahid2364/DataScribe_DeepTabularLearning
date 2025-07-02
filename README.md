@@ -30,7 +30,7 @@ Department of Materials Science & Engineering, Texas A&M University.
 <p align="center">
    <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov3.gif" 
       alt="DataScribe Demo" 
-      style="border:2px solid black; display:block; margin:auto; width:80%;">
+      style="border:2px solid black; display:block; margin:auto; width:90%;">
    <br>
    <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.</em>
 </p>
@@ -189,7 +189,7 @@ The repository implements and benchmarks the following models:
 <p align="center">
    <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov2.gif" 
       alt="DataScribe Demo" 
-      style="border:2px solid black; display:block; margin:auto; width:80%;">
+      style="border:2px solid black; display:block; margin:auto; width:90%;">
    <br>
    <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.</em>
 </p>
