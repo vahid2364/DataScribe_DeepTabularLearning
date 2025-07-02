@@ -7,9 +7,12 @@ Created on Wed Jun 25 02:47:14 2025
 
 # app.py
 import streamlit as st
+#import streamlit.web.bootstrap
+
 import pandas as pd
 import numpy as np
 import os
+import base64
 
 from scaling_utils import Scaling
 from model_utils import AutoencoderModel, step_decay_schedule, StreamlitProgressCallback
@@ -18,12 +21,14 @@ from visualize import PlotlyVisualizer
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import plot_model
 
+st.set_page_config(page_title="DataScribe GUI", layout="wide")
+
 # CSS styling
 st.markdown("""
     <style>
     /* Main app background and font */
     .block-container {
-        #background-color: #FFFBEC;
+        /* background-color: #FFFBEC; */
         font-family: 'Segoe UI', sans-serif;
     }
 
@@ -100,12 +105,18 @@ st.markdown("""
         display: flex;
         justify-content: center;
     }
+
+    input[type="number"] {
+        font-size: 20px !important;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
 
-import base64
-
+#if __name__ == "__main__":
+#    streamlit.web.bootstrap.run(__file__, '', [], {})
+    
 file_path = "assets/app-icon.png"
 with open(file_path, "rb") as f:
     data = f.read()
@@ -122,7 +133,6 @@ st.markdown(
 
 
 os.makedirs("results", exist_ok=True)
-st.set_page_config(page_title="Autoencoder Trainer", layout="wide")
 
 st.markdown("""
     <h1 style='font-size: 40px; text-align: center; font-weight: bold;'>
@@ -301,10 +311,19 @@ if df is not None:
             #st.code(summary_string, language="text")
             
             # Save model plot
-            plot_model(model.autoencoder, to_file="results/model_architecture.png", show_shapes=True, show_layer_names=True)
+            with st.container(border=True):
+                # Save model plots
+                #plot_model(model.autoencoder, to_file="results/model_architecture.png", show_shapes=True, show_layer_names=False)
+                plot_model(model.encoder, to_file="results/encoder_architecture.png", show_shapes=True, show_layer_names=False, rankdir='LR')
+                plot_model(model.decoder, to_file="results/decoder_architecture.png", show_shapes=True, show_layer_names=False, rankdir='LR')
             
-            # Show in Streamlit
-            st.image("results/model_architecture.png", caption="Model Architecture", width=350)
+                # Show main autoencoder plot
+                #st.image("results/model_architecture.png", caption="Model Architecture", width=350)
+            
+                # Show encoder & decoder side by side
+                st.write("## Encoder & Decoder Architectures")
+                st.image("results/encoder_architecture.png", caption="Encoder Architecture", use_container_width=True)
+                st.image("results/decoder_architecture.png", caption="Decoder Architecture", use_container_width=True)
             
             st.sidebar.header("Step 7: Training Config")
             epochs = st.sidebar.slider("Epochs", 10, 300, 150, step=10)
@@ -316,8 +335,6 @@ if df is not None:
                 status_text = st.empty()
                 
                 st.write("### Training Autoencoder...")
-
-
                 
                 callbacks = [
                     step_decay_schedule(),
@@ -329,8 +346,8 @@ if df is not None:
                 history = model.train(X_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=callbacks)
 
                 st.success("Model training complete.")
-                #Visualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
-                PlotlyVisualizer.plot_loss(history, log_scale=False)
+                Visualizer.plot_loss(history, filename="results/loss_streamlit_run.jpg", log_scale=False)
+                #PlotlyVisualizer.plot_loss(history, log_scale=False)
 
                 #if os.path.exists("results/loss_streamlit_run.jpg"):
                 #    st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", use_container_width=True)
@@ -339,31 +356,86 @@ if df is not None:
                 _, y_test_inv = scaler.inverse_scale_data(X_test, y_test, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
                 _, y_pred_inv = scaler.inverse_scale_data(X_test, y_pred, apply_log1p=apply_log1p, apply_sigmoid=apply_sigmoid)
 
-                #PlotlyVisualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
-                #PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
-                PlotlyVisualizer.scatter_plot(y_test, y_pred, log_scale=False)
-                PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, log_scale=True)
+                Visualizer.scatter_plot(y_test, y_pred, filename="results/scatter_scaled.jpg", log_scale=False)
+                Visualizer.scatter_plot(y_test_inv, y_pred_inv, filename="results/scatter_original.jpg", log_scale=True)
+                #PlotlyVisualizer.scatter_plot(y_test, y_pred, log_scale=False)
+                #PlotlyVisualizer.scatter_plot(y_test_inv, y_pred_inv, log_scale=True)
 
                 st.session_state["model_trained"] = True
                 st.session_state["y_test_inv"] = y_test_inv
                 st.session_state["y_pred_inv"] = y_pred_inv
+                
 
 # --- Persisted Outputs ---
 if st.session_state.get("model_trained", False):
-    if os.path.exists("results/loss_streamlit_run.jpg"):
-        st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", width=900)
+    #if os.path.exists("results/loss_streamlit_run.jpg"):
+    #    st.image("results/loss_streamlit_run.jpg", caption="Loss Plot", width=900)
 
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns([0.7, 0.7, 0.7], gap='large')
     
     with col1:
+        if os.path.exists("results/loss_streamlit_run.jpg"):
+            st.image("results/loss_streamlit_run.jpg", caption="Training History", use_container_width=True)
+    with col2:
         if os.path.exists("results/scatter_scaled.jpg"):
             st.image("results/scatter_scaled.jpg", caption="Scatter Plot (Scaled Space)", use_container_width=True)    
-    with col2:
+    with col3:
         if os.path.exists("results/scatter_original.jpg"):
             st.image("results/scatter_original.jpg", caption="Scatter Plot (Original Space, Log)", use_container_width=True)
 
+    # --- User Prediction ---
+    if st.session_state.get("model_trained", False):
+        # --- Predict on new user inputs
+        st.header("🔎 Predict for New Inputs")
+        scaler = st.session_state["scaler"]
+        input_values = []
+        
+        st.markdown("<div style='font-size:20px; font-weight:600;'>Enter values for input features:</div>", unsafe_allow_html=True)
+        
+        for i in range(0, len(input_columns), 3):
+            cols = st.columns(3)
+            for j, feature in enumerate(input_columns[i:i+3]):
+                with cols[j]:
+                    st.markdown(f"<div style='font-size:24px; font-weight:600'>{feature}</div>", unsafe_allow_html=True)
+                    val = st.number_input(f"{feature}", value=float(df[feature].mean()), key=f"{feature}_input", label_visibility="collapsed")
+                    input_values.append(val)
+        
+        input_array = np.array(input_values).reshape(1, -1)
+        
+        # Scale exactly like during training
+        input_scaled = input_array
+        if scaler.pt_inputs:
+            input_scaled = scaler.pt_inputs.transform(input_scaled)
+        if scaler.qt_inputs:
+            input_scaled = scaler.qt_inputs.transform(input_scaled)
+        if scaler.input_scaler:
+            input_scaled = scaler.input_scaler.transform(input_scaled)
+        if apply_log1p:
+            input_scaled = np.log1p(input_scaled)
+        if apply_sigmoid:
+            input_scaled = 1 / (1 + np.exp(-input_scaled))
+        
+        # Predict
+        pred_scaled = model.predict(input_scaled)
+        
+        # Inverse scale to original space
+        pred_output = pred_scaled
+        if scaler.output_scaler:
+            pred_output = scaler.output_scaler.inverse_transform(pred_output)
+        if scaler.qt_outputs:
+            pred_output = scaler.qt_outputs.inverse_transform(pred_output)
+        if scaler.pt_outputs:
+            pred_output = scaler.pt_outputs.inverse_transform(pred_output)
+        if apply_log1p:
+            pred_output = np.expm1(pred_output)
+        if apply_sigmoid:
+            pred_output = -np.log((1 / pred_output) - 1)
+        
+        st.success(f"Predicted {output_columns[0]}: {pred_output.flatten()[0]:.5f}")
+        
 
+    
 
     download_df = pd.DataFrame({
         "True": st.session_state["y_test_inv"][:, 0],
