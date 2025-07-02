@@ -27,6 +27,15 @@ This repository provides the code, data, and documentation for the paper:
 *Vahid Attari, Raymundo Arroyave*  
 Department of Materials Science & Engineering, Texas A&M University.
 
+<p align="center">
+   <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov3.gif" 
+      alt="DataScribe Demo" 
+      style="border:2px solid black; display:block; margin:auto; width:80%;">
+   <br>
+   <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.</em>
+</p>
+
+
 <div align="center">
    <img src="https://media.licdn.com/dms/image/v2/C4E12AQE98dfpdYhxZA/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1610116669577?e=2147483647&v=beta&t=A7bKteJy6T0CUcImJUute3Bio5J_olkFKVXwgy-TMP8" alt="Work in Progress" width="200">
 </div>
@@ -182,7 +191,7 @@ The repository implements and benchmarks the following models:
       alt="DataScribe Demo" 
       style="border:2px solid black; display:block; margin:auto; width:80%;">
    <br>
-   <em>Figure: DataScribe GUI demo showing encoder-decoder training on tabular data.</em>
+   <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.</em>
 </p>
 
 ---
