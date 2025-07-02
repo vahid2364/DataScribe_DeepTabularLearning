@@ -180,6 +180,8 @@ The repository implements and benchmarks the following models:
 ![Demo](DataScribe_DeepTabularLearning/Software/software-modular-GUI
 /DataScribeTabularLearning-app-mov2.gif)
 
+![Demo](DataScribe_DeepTabularLearning/Software/software-modular-GUI/DataScribeTabularLearning-app-mov2.gif)
+
 ---
 
 ## 🔍 Results
