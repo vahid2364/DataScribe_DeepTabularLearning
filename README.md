@@ -31,7 +31,7 @@ Department of Materials Science & Engineering, Texas A&M University.
    <a href="https://youtu.be/mSeamv819hI" target="_blank">
       <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov3.gif" 
          alt="DataScribe Demo" 
-         style="border:2px solid black; display:block; margin:auto; width:100%;">
+         style="border:2px solid black; display:block; margin:0; width:100%;">
    </a>
    <br>
    <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.<br>
