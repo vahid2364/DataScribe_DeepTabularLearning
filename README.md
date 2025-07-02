@@ -28,11 +28,13 @@ This repository provides the code, data, and documentation for the paper:
 Department of Materials Science & Engineering, Texas A&M University.
 
 <p align="center">
-   <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov3.gif" 
-      alt="DataScribe Demo" 
-      style="border:2px solid black; display:block; margin:auto; width:90%;">
+   <a href="https://youtu.be/mSeamv819hI" target="_blank">
+      <img src="https://img.youtube.com/vi/mSeamv819hI/0.jpg" 
+         alt="Watch the demo on YouTube"
+         style="border:2px solid black; border-radius:6px;">
+   </a>
    <br>
-   <em>Figure: DataScribe GUI demo showing encoder-decoder training on HEA tabular data.</em>
+   <em>Click the image to watch a video demonstration of DataScribe GUI for training an encoder-decoder model on HEA data on YouTube.</em>
 </p>
 
 
