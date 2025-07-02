@@ -177,7 +177,13 @@ The repository implements and benchmarks the following models:
 - 🎛️ Use the provided graphical interface to train models on any dataset with custom hyperparameters.
 - 🧑‍💻 This serves as a hands-on sandbox for students and practitioners to explore and understand different aspects of machine learning models.
 
-![Demo](software/software-modular-GUI/DataScribeTabularLearning-app-mov2.gif)
+<p align="center">
+   <img src="Software/software-modular-GUI/DataScribeTabularLearning-app-mov2.gif" 
+      alt="DataScribe Demo" 
+      style="border:2px solid black; display:block; margin:auto; width:80%;">
+   <br>
+   <em>Figure: DataScribe GUI demo showing encoder-decoder training on tabular data.</em>
+</p>
 
 ---
 
