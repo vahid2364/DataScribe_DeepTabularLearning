@@ -506,7 +506,7 @@ class Sampling(Layer):
         return z_mean + K.exp(0.5 * z_log_var) * epsilon  # Use K.exp for the exponential calculation
     
 
-def create_variational_encoder(input_dim, latent_dim, layer_sizes=[2056, 1024, 512, 256], lamb=1e-3, rate=0.2, alpha=0.1):
+def create_variational_encoder(input_dim, latent_dim, layer_sizes=[256, 512, 1024], lamb=1e-3, rate=0.2, alpha=0.1):
     input_layer = Input(shape=(input_dim,))  # The input layer for tabular data
     x = input_layer
 
@@ -527,7 +527,7 @@ def create_variational_encoder(input_dim, latent_dim, layer_sizes=[2056, 1024, 5
     # Return inputs and outputs instead of the encoder model
     return input_layer, [z_mean, z_log_var, z]
 
-def create_variational_decoder(output_dim, latent_dim, layer_sizes=[256, 512, 1024, 2056], lamb=1e-3, rate=0.2, alpha=0.1):
+def create_variational_decoder(output_dim, latent_dim, layer_sizes=[1024, 512, 256], lamb=1e-3, rate=0.2, alpha=0.1):
     latent_inputs = Input(shape=(latent_dim,), name='z_sampling')
     x = latent_inputs
 
@@ -549,7 +549,7 @@ def create_variational_decoder(output_dim, latent_dim, layer_sizes=[256, 512, 10
 # Building the VAE model
 input_dim = X_train.shape[1]  # Number of input features
 output_dim = y_train.shape[1]  # Number of output features
-latent_dim = 16  # Size of latent space
+latent_dim = 128  # Size of latent space
 lamb = 2.85e-5
 rate = 0.2
 alp  = 0.045 
@@ -605,19 +605,25 @@ class VAE(keras.Model):  # Inherit from keras.Model
             reconstruction = self.decoder(z)
 
             # Compute reconstruction loss (for regression, you can use MSE or MAE)
-            reconstruction_loss = K.mean(
-                K.sum(
-                    keras.losses.mean_squared_error(y, reconstruction),  # MSE for regression
-                    axis=-1
-                )
-            )
-
+            #reconstruction_loss = K.mean(
+                #K.sum(
+                    #keras.losses.mean_squared_error(y, reconstruction),  # MSE for regression
+                    #keras.losses.MeanSquaredError()(y, reconstruction),
+                #    axis=-1
+                #)
+            #)
+            #reconstruction_loss = K.mean(K.square(y - reconstruction))
+            #reconstruction_loss = keras.losses.mean_squared_error(y, reconstruction)
+            #reconstruction_loss = K.mean(reconstruction_loss)
+            reconstruction_loss = tf.reduce_mean(tf.square(y - reconstruction))
+            
             # Compute KL divergence loss
             kl_loss = -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=1)
             kl_loss = K.mean(kl_loss)
 
             # Total loss
-            total_loss = reconstruction_loss + kl_loss
+            beta = 0.0001  # or experiment with 0.1, 0.001
+            total_loss = reconstruction_loss + beta*kl_loss
 
         # Compute gradients and apply them
         grads = tape.gradient(total_loss, self.trainable_weights)
@@ -641,16 +647,21 @@ class VAE(keras.Model):  # Inherit from keras.Model
         reconstruction = self.decoder(z)
     
         # Compute reconstruction loss
-        reconstruction_loss = K.mean(
-            keras.losses.mean_squared_error(y, reconstruction)
-        )
+        #reconstruction_loss = K.mean(
+        #    keras.losses.mean_squared_error(y, reconstruction)
+        #)
+        #reconstruction_loss = K.mean(K.square(y - reconstruction))
+        #reconstruction_loss = keras.losses.mean_squared_error(y, reconstruction)
+        #reconstruction_loss = K.mean(reconstruction_loss)
+        reconstruction_loss = tf.reduce_mean(tf.square(y - reconstruction))
     
         # Compute KL divergence loss
         kl_loss = -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=1)
         kl_loss = K.mean(kl_loss)
     
         # Total loss
-        total_loss = reconstruction_loss + kl_loss
+        beta = 0.0001  # or experiment with 0.1, 0.001
+        total_loss = reconstruction_loss + beta*kl_loss
     
         return {
             "loss": total_loss,
@@ -680,7 +691,7 @@ vae.summary()
 # Train the model
 history = vae.fit(
     X_train, y_train,
-    epochs=50,
+    epochs=100,
     batch_size=128,
     validation_split=0.1,
     shuffle=True,
@@ -696,7 +707,7 @@ history = vae.fit(
 # %% Loss vs Epoch
 
 # Plot the losses
-plt.figure(figsize=(14, 8))
+plt.figure(figsize=(8, 4))
 epochs = range(len(history.history['loss']))
 
 # # Combined loss
@@ -721,10 +732,13 @@ if 'val_loss' in history.history:
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
 
-    plt.legend()
-    plt.grid(True)
+    plt.legend(loc='center right', fontsize=9)
+    #plt.grid(True)
+    plt.yscale('log')
+
+    plt.tight_layout()
+    plt.savefig('loss_VAE.jpg')
     plt.show()
-    plt.savefig('loss.jpg')
 
 # %% Evaluate the autoencoder
 
@@ -772,6 +786,7 @@ print("Mean Squared Error (MSE):", mse)
 
 # # Calculate MSE for each feature
 mse_per_feature = mean_squared_error(y_test_original, predictions, multioutput='raw_values')
+r2_per_feature = r2_score(y_test_original, predictions, multioutput='raw_values')
 
 # Print the MSE for each feature
 for i, mse in enumerate(mse_per_feature):
@@ -826,7 +841,6 @@ def generate_metrics_dataframe(predictions, y_test_original, output_columns):
     r2_per_feature = r2_score(y_test_original, predictions, multioutput='raw_values')
     ev_per_feature = explained_variance_score(y_test_original, predictions, multioutput='raw_values')
 
-    
     # Create a DataFrame to hold the results
     results_dict = {
         "Model Name": ["Encoder-Decoder (VAE)"],

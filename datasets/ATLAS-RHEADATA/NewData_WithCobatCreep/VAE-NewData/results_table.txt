@@ -2,6 +2,6 @@
 \toprule
 Model Name & YS 1000C PRIOR & EQ 1273K Density (g/cc) & EQ 1273K THCD (W/mK) & Kou Criteria & 1300 Min Creep CB [1/s] \\
 \midrule
-Encoder-Decoder (VAE) & MSE: 9.683e+04 (R$^2$: 0.736) & MSE: 0.941 (R$^2$: 0.664) & MSE: 73.1 (R$^2$: 0.588) & MSE: 1.197e+05 (R$^2$: 0.332) & MSE: 3.266e-23 (R$^2$: 0.102) \\
+Encoder-Decoder (VAE) & MSE: 1.116e+04 (R$^2$: 0.97) & MSE: 0.2482 (R$^2$: 0.911) & MSE: 19.54 (R$^2$: 0.89) & MSE: 1.647e+04 (R$^2$: 0.908) & MSE: 1.15e-23 (R$^2$: 0.684) \\
 \bottomrule
 \end{tabular}

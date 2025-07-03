@@ -561,8 +561,9 @@ plt.plot(x_axis, model.evals_result()['validation_0']['rmse'], label='Train')
 plt.plot(x_axis, model.evals_result()['validation_1']['rmse'], label='Test')
 plt.xlabel('Epochs')
 plt.ylabel('RMSE')
-plt.title('XGBoost Training and Test Loss')
+#plt.title('XGBoost Training and Test Loss')
 plt.legend()
+plt.tight_layout()
 plt.savefig('loss_xgboost.jpg', dpi=300)
 #plt.grid(True)
 plt.show()
@@ -621,6 +622,7 @@ print(f"Root Mean Squared Error: {rmse}")
 
 # # Calculate MSE for each feature
 mse_per_feature = mean_squared_error(y_test_original, predictions, multioutput='raw_values')
+r2_per_feature = r2_score(y_test_original, predictions, multioutput='raw_values')
 
 # Print the MSE for each feature
 for i, mse in enumerate(mse_per_feature):
@@ -636,6 +638,7 @@ print(f'Test MSE: {test_mse}')
 print(f'Test R²: {test_r2}')
 print(f'Test Explained Variance: {test_ev}')
 #print(f'Duration: {duration} seconds')
+
 
 
 # %% QQ PLOTs

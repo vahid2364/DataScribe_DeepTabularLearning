@@ -253,6 +253,41 @@ latex_table += r"""
 
 print(latex_table)
 
+# %% complexity, kurtusis and Skewness bar plots
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Set seaborn style
+sns.set(style="whitegrid")
+
+# Create a figure with 3 subplots horizontally
+fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharey=False)
+
+# Barplot for Skewness
+sns.barplot(x=summary_df.index, y='Skewness', data=summary_df, palette='crest', ax=axes[0])
+axes[0].set_title('Skewness of Features', fontsize=14)
+axes[0].set_ylabel('Skewness')
+axes[0].set_xlabel('')
+axes[0].tick_params(axis='x', rotation=90)
+
+# Barplot for Kurtosis
+sns.barplot(x=summary_df.index, y='Kurtosis', data=summary_df, palette='flare', ax=axes[1])
+axes[1].set_title('Kurtosis of Features', fontsize=14)
+axes[1].set_ylabel('Kurtosis')
+axes[1].set_xlabel('')
+axes[1].tick_params(axis='x', rotation=90)
+
+# Barplot for Feature Complexity
+sns.barplot(x=summary_df.index, y='Feature Complexity', data=summary_df, palette='mako', ax=axes[2])
+axes[2].set_title('Feature Complexity (|Skew| + |Kurt-3|)', fontsize=14)
+axes[2].set_ylabel('Feature Complexity')
+axes[2].set_xlabel('')
+axes[2].tick_params(axis='x', rotation=90)
+
+# Adjust layout for tightness
+plt.tight_layout()
+plt.show()
+
 pause
 # %%
 

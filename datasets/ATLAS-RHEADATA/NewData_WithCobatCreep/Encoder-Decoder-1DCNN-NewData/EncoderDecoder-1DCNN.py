@@ -642,6 +642,7 @@ if 'val_loss' in history.history:
     plt.yscale('log')
     plt.legend()
     plt.grid(True)
+    plt.tight_layout()
     plt.savefig('loss.jpg')
     plt.show()
 
