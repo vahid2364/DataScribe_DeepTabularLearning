@@ -286,6 +286,7 @@ axes[2].tick_params(axis='x', rotation=90)
 
 # Adjust layout for tightness
 plt.tight_layout()
+plt.savefig('barplot_ATLASRHEA_skewness.jpg')
 plt.show()
 
 pause
